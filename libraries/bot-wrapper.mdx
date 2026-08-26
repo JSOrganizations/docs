@@ -1,0 +1,155 @@
+---
+title: 'Telegram Bot API (Bot Wrapper)'
+description: 'Exhaustive reference for all supported Telegram Bot API methods in Bots Limited'
+---
+
+Bots Limited provides a direct wrapper around the official Telegram Bot API via the `Bot` (or `bot`) object. You can use it to send messages, photos, keyboards, and manage chats.
+
+## Core Methods
+
+### `Bot.sendMessage(chat_id, text, **kwargs)`
+Sends a text message to a user or group.
+- **`chat_id`** *(int)*: Target chat ID.
+- **`text`** *(str)*: The text of the message.
+- **`parse_mode`** *(str)*: Usually `"HTML"` or `"Markdown"`.
+- **`reply_markup`** *(dict)*: Keyboard markup (see Keyboards section below).
+
+```python
+Bot.sendMessage(chat_id=chat_id, text="<b>Hello</b> World!", parse_mode="HTML")
+```
+
+### `Bot.sendPhoto(chat_id, photo, caption="", **kwargs)`
+Sends an image.
+- **`photo`** *(str)*: A URL to an image or a Telegram file_id.
+
+```python
+Bot.sendPhoto(
+    chat_id=chat_id, 
+    photo="https://example.com/image.jpg", 
+    caption="Check out this image!"
+)
+```
+
+### `Bot.sendVideo(chat_id, video, caption="", **kwargs)`
+Sends a video file.
+
+### `Bot.sendDocument(chat_id, document, caption="", **kwargs)`
+Sends a general file.
+
+### `Bot.sendAudio(chat_id, audio, caption="", **kwargs)`
+Sends an audio file (MP3).
+
+### `Bot.sendVoice(chat_id, voice, **kwargs)`
+Sends a voice note (OGG).
+
+### `Bot.sendSticker(chat_id, sticker, **kwargs)`
+Sends a sticker (requires a sticker `file_id`).
+
+### `Bot.sendLocation(chat_id, latitude, longitude, **kwargs)`
+Sends a point on the map.
+
+### `Bot.sendContact(chat_id, phone_number, first_name, **kwargs)`
+Sends a contact card.
+
+### `Bot.sendDice(chat_id, emoji="🎲", **kwargs)`
+Sends a random animated dice.
+
+### `Bot.sendPoll(chat_id, question, options, is_anonymous=True, **kwargs)`
+Sends a poll. `options` must be a JSON array of strings.
+
+---
+
+## Message Management
+
+### `Bot.editMessageText(chat_id, message_id, text, **kwargs)`
+Edits an existing text message.
+
+### `Bot.editMessageMedia(chat_id, message_id, media, **kwargs)`
+Edits the media of a message. `media` must be a Telegram InputMedia JSON object.
+
+### `Bot.deleteMessage(chat_id, message_id)`
+Deletes a message from a chat.
+
+### `Bot.forwardMessage(chat_id, from_chat_id, message_id)`
+Forwards a message of any kind.
+
+### `Bot.copyMessage(chat_id, from_chat_id, message_id, **kwargs)`
+Copies a message of any kind without the "Forwarded from" tag.
+
+---
+
+## Inline Queries & Callbacks
+
+### `Bot.answerCallbackQuery(callback_query_id, text="", show_alert=False)`
+Answers a callback query (when a user clicks an Inline Keyboard Button). Stops the loading spinner on the button.
+```python
+Bot.answerCallbackQuery(call.id, text="Button clicked!", show_alert=True)
+```
+
+---
+
+## Keyboards and Markups
+
+Bots Limited supports native Python classes for creating beautiful keyboards without writing raw JSON.
+
+### Inline Keyboards (Buttons under messages)
+
+Use `InlineKeyboardMarkup` and `InlineKeyboardButton`.
+
+```python
+keys = [
+    [
+        InlineKeyboardButton(text="🔐 Open App", web_app="https://example.com"),
+        InlineKeyboardButton(text="Google", url="https://google.com")
+    ],
+    [
+        InlineKeyboardButton(text="Click Me", callback_data="/btn_clicked")
+    ]
+]
+
+button = InlineKeyboardMarkup(keys)
+
+Bot.sendMessage(chat_id, "Choose an option:", reply_markup=button)
+```
+
+### Reply Keyboards (Custom user keyboard)
+
+Use `ReplyKeyboardMarkup` and `KeyboardButton`.
+
+```python
+keys = [
+    [KeyboardButton(text="Send Contact", request_contact=True)],
+    [KeyboardButton(text="Send Location", request_location=True)]
+]
+
+markup = ReplyKeyboardMarkup(keys, resize_keyboard=True)
+
+Bot.sendMessage(chat_id, "Please share your contact:", reply_markup=markup)
+```
+
+### Remove Reply Keyboard
+To hide a custom reply keyboard, use `ReplyKeyboardRemove`.
+
+```python
+Bot.sendMessage(
+    chat_id, 
+    "Keyboard removed.", 
+    reply_markup=ReplyKeyboardRemove()
+)
+```
+
+---
+
+## Utility Functions
+
+### `Bot.genId()`
+Generates a random UUID (e.g., `807685cd-b4aa-...`).
+```python
+unique_id = Bot.genId()
+```
+
+### `Bot.genRandomId(length=7)`
+Generates a numeric random ID of the specified length (default 7).
+```python
+random_num = Bot.genRandomId() # Returns something like "2065849"
+```

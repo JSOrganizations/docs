@@ -1,0 +1,126 @@
+---
+title: 'Sending Media'
+description: 'Telegram API methods for sending photos, videos, and documents.'
+---
+
+## sendPhoto
+
+Use this method to send photos.
+
+```python TPY Example (URL)
+Bot.sendPhoto(
+    chat_id=u,
+    photo="https://example.com/image.jpg",
+    caption="Here is your photo!"
+)
+```
+
+```python TPY Example (File ID)
+Bot.sendPhoto(
+    chat_id=u,
+    photo="AgACAgIAAxkBAAMu...",
+    caption="Here is your photo!"
+)
+```
+
+---
+
+## sendVideo
+
+Use this method to send video files, Telegram clients support mp4 videos.
+
+```python TPY Example
+Bot.sendVideo(
+    chat_id=u,
+    video="https://example.com/video.mp4",
+    caption="Watch this video!"
+)
+```
+
+---
+
+## sendDocument
+
+Use this method to send general files.
+
+```python TPY Example
+Bot.sendDocument(
+    chat_id=u,
+    document="https://example.com/file.pdf",
+    caption="Please see the attached document."
+)
+```
+
+---
+
+## sendAudio & sendVoice
+
+Use `sendAudio` for MP3 files (music), and `sendVoice` for OGG files (voice notes).
+
+```python sendAudio
+Bot.sendAudio(
+    chat_id=u,
+    audio="https://example.com/song.mp3",
+    title="My Song",
+    performer="Artist Name"
+)
+```
+
+```python sendVoice
+Bot.sendVoice(
+    chat_id=u,
+    voice="https://example.com/voice.ogg"
+)
+```
+
+---
+
+## sendMediaGroup (Albums)
+
+Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type.
+
+```python TPY Example
+media_array = [
+    {"type": "photo", "media": "https://example.com/1.jpg"},
+    {"type": "photo", "media": "https://example.com/2.jpg", "caption": "Group caption"}
+]
+
+Bot.sendMediaGroup(
+    chat_id=u,
+    media=media_array
+)
+```
+
+---
+
+## Location & Contacts
+
+### sendLocation
+```python TPY Example
+Bot.sendLocation(
+    chat_id=u,
+    latitude=40.7128,
+    longitude=-74.0060
+)
+```
+
+### sendVenue
+```python TPY Example
+Bot.sendVenue(
+    chat_id=u,
+    latitude=40.7128,
+    longitude=-74.0060,
+    title="Central Park",
+    address="New York, NY"
+)
+```
+
+### sendContact
+```python TPY Example
+Bot.sendContact(
+    chat_id=u,
+    phone_number="+1234567890",
+    first_name="John",
+    last_name="Doe"
+)
+```

@@ -1,0 +1,50 @@
+---
+title: 'Command Routing'
+description: 'How to handle user messages and events using commands'
+---
+
+In Bots Limited, every piece of logic is triggered by a **Command**. A command is a specific string or pattern that the platform listens for.
+
+## Command Types
+
+### 1. Exact Match Commands
+The most common type of command. If a user types exactly this string, the corresponding code executes.
+- Example: `/start`, `/help`, `Menu`
+
+### 2. Wildcard Command (`*`)
+The wildcard command catches **any message** that doesn't match an exact command. 
+This is useful for:
+- Chatbots using AI (ChatGPT/Gemini)
+- Catch-all fallback messages ("I don't understand that command.")
+- Tracking user state.
+
+### 3. Before All Command (`@`)
+The `@` command is special. If it exists, it runs **before any other command**. 
+- It is commonly used for **middleware**, such as checking if a user is banned, checking if a user joined a required channel (Force Sub), or logging activity.
+- If you call `ReturnCommand()` inside the `@` command, the execution stops, and the actual triggered command will **not** run.
+
+<CodeGroup>
+
+```python Checking for Banned Users (@ command)
+# Check if user is in our ban list
+if User.getData("banned") == "true":
+    Bot.sendMessage(chat_id, "You are banned from using this bot.")
+    ReturnCommand() # Stops execution here
+```
+
+</CodeGroup>
+
+## Special Event Handlers
+
+Aside from text messages, Telegram sends other types of updates (like button clicks, photo uploads, or new members joining). Bots Limited maps these to special command names:
+
+- `/handler_callback_query`: Triggered when a user clicks an `InlineKeyboardButton`.
+- `/handler_photo`: Triggered when a user sends an image.
+- `/handler_document`: Triggered when a user sends a file.
+- `/handler_new_chat_members`: Triggered when someone joins a group.
+- `/handler_left_chat_member`: Triggered when someone leaves a group.
+- `/handler_my_chat_member`: Triggered when the bot is kicked or added to a group.
+
+<Note>
+Inside `/handler_callback_query`, the text of the button click is available in the `message.data` or `msg` variable.
+</Note>

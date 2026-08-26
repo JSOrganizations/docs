@@ -1,0 +1,91 @@
+---
+title: 'TPY Syntax & Variables'
+description: 'Understanding the Restricted Python environment and built-in variables'
+---
+
+Bots Limited uses a custom execution environment called **TPY**. TPY is built on top of standard Python 3, but with specific security restrictions to ensure safe execution on our cloud platform.
+
+## What is Restricted Python?
+
+When you write commands in Bots Limited, you are writing Python code. However, you cannot use operations that could compromise the server:
+- `import` statements are blocked.
+- `open()`, `eval()`, and `exec()` are blocked.
+- Infinite loops (`while True`) are heavily restricted or blocked to prevent execution timeouts.
+
+Instead of importing modules, Bots Limited injects safe **Built-in Objects and Variables** directly into your code.
+
+---
+
+## Global Variables
+
+Whenever a command runs, the following variables are automatically available in your code.
+
+### `chat_id` / `u`
+An integer representing the Telegram ID of the user or group that triggered the command. Both `chat_id` and `u` are identical and can be used interchangeably.
+```python
+Bot.sendMessage(chat_id, "Hello!")
+Bot.sendMessage(u, "Hello again!")
+```
+
+### `message`
+A dictionary containing the raw Telegram Message object. 
+- `message.text`: The text the user sent.
+- `message.message_id`: The ID of the message.
+- `message.from.id`: The sender's user ID.
+
+### `call`
+If the command was triggered by an Inline Keyboard Button click (Callback Query), this variable contains the Telegram CallbackQuery object. Otherwise, it is `None`.
+- `call.id`: The unique ID for the query.
+- `call.data`: The callback data attached to the button.
+
+### `command`
+The raw string of the command that was matched.
+
+### `params`
+Any text that comes *after* the command. 
+For example, if the user sends `/start 12345`, the `command` variable is `/start` and `params` is `12345`.
+
+---
+
+## Built-in Modules
+
+We provide safe wrappers for common Python functionalities.
+
+### `time`
+A safe wrapper for time functions.
+- `time.time()`: Returns the current UNIX timestamp.
+
+### `re` / `regex`
+The standard Python `re` module for regular expressions.
+
+### `hashlib` & `base64`
+For cryptography and encoding.
+
+### `jsondumps` & `bf_json`
+Functions for parsing and formatting JSON strings safely.
+
+---
+
+## Data Storage Scopes
+
+You do not need an external database. Bots Limited provides a blazing-fast built-in Key-Value (KV) store accessible via three scopes:
+
+### 1. `User` (User Scope)
+Data is saved for the specific user (`chat_id`) interacting with the bot.
+```python
+User.saveData("balance", 100)
+current_balance = User.getData("balance")
+```
+
+### 2. `Bot` (Bot Scope)
+Data is saved globally for the entire bot (e.g., global stats, settings).
+```python
+Bot.saveData("total_users", 5000)
+total = Bot.getData("total_users")
+```
+
+### 3. `Api` (Global/Developer Scope)
+Used for data shared across multiple bots owned by the same developer.
+```python
+Api.saveData("dev_api_key", "secret123")
+```

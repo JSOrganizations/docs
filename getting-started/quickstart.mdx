@@ -1,0 +1,63 @@
+---
+title: 'Quick Start'
+description: 'Create your first bot on Bots Limited in under 5 minutes'
+---
+
+Creating a bot on Bots Limited is incredibly simple. Follow these steps to get your bot live and responding to users.
+
+## Step 1: Create a Bot on Telegram
+
+Before using Bots Limited, you need to create a bot on Telegram and get a **Bot Token**.
+
+<Steps>
+  <Step title="Open BotFather">
+    Search for `@BotFather` on Telegram and start a chat.
+  </Step>
+  <Step title="Create New Bot">
+    Send the command `/newbot` and follow the instructions. Provide a display name and a username for your bot.
+  </Step>
+  <Step title="Copy the Token">
+    Once created, BotFather will give you an API Token (e.g., `123456789:ABCdefGHIjklMNOpqrSTUvwxYZ`). Copy this token.
+  </Step>
+</Steps>
+
+## Step 2: Add Bot to Bots Limited
+
+Now that you have your token, you can add it to the platform.
+
+<Steps>
+  <Step title="Login to Bots Limited">
+    Go to the [Bots Limited Dashboard](https://bots.lt) and log in to your account.
+  </Step>
+  <Step title="Add New Bot">
+    Click on the **"Create New Bot"** button and paste the token you got from BotFather.
+  </Step>
+  <Step title="Start Coding">
+    Click on your bot in the dashboard to open the **Code Editor**.
+  </Step>
+</Steps>
+
+## Step 3: Write Your First Command
+
+By default, every bot should have a `/start` command. 
+
+1. In the Editor, create a new command and name it `/start`.
+2. Enter the following TPY (Python) code:
+
+```python
+Bot.sendMessage(
+    chat_id=chat_id, 
+    text="Hello! Welcome to my new bot on Bots Limited!"
+)
+```
+
+3. Save the command.
+4. Open your bot on Telegram and click **START**. Your bot will instantly reply!
+
+## What's Next?
+
+Congratulations, your bot is live! There's a lot more you can do with Bots Limited.
+
+- Learn how to structure complex [Commands](/reference/commands).
+- Understand the [TPY Syntax](/reference/tpy-syntax) constraints and features.
+- Explore the [Core Libraries](/libraries/bot-wrapper) to send media, buttons, and more.

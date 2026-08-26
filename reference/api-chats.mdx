@@ -1,0 +1,102 @@
+---
+title: 'Chat & Members'
+description: 'Telegram API methods for managing groups, channels, and members.'
+---
+
+## banChatMember
+
+Use this method to ban a user in a group, a supergroup or a channel.
+
+```python TPY Example
+Bot.banChatMember(
+    chat_id=group_id,
+    user_id=target_user_id
+)
+```
+
+---
+
+## unbanChatMember
+
+Use this method to unban a previously banned user in a supergroup or channel.
+
+```python TPY Example
+Bot.unbanChatMember(
+    chat_id=group_id,
+    user_id=target_user_id,
+    only_if_banned=True
+)
+```
+
+---
+
+## restrictChatMember
+
+Use this method to restrict a user in a supergroup.
+
+```python TPY Example
+permissions = {
+    "can_send_messages": False,
+    "can_send_media_messages": False,
+    "can_send_other_messages": False,
+    "can_add_web_page_previews": False
+}
+
+Bot.restrictChatMember(
+    chat_id=group_id,
+    user_id=target_user_id,
+    permissions=permissions
+)
+```
+
+---
+
+## promoteChatMember
+
+Use this method to promote or demote a user in a supergroup or a channel.
+
+```python TPY Example
+Bot.promoteChatMember(
+    chat_id=group_id,
+    user_id=target_user_id,
+    can_change_info=True,
+    can_delete_messages=True,
+    can_invite_users=True,
+    can_restrict_members=True,
+    can_pin_messages=True,
+    can_manage_topics=True
+)
+```
+
+---
+
+## setChatTitle & setChatDescription
+
+Use these methods to change the title or description of a chat.
+
+```python TPY Example
+Bot.setChatTitle(
+    chat_id=group_id,
+    title="New Awesome Group Name"
+)
+
+Bot.setChatDescription(
+    chat_id=group_id,
+    description="Welcome to the most awesome group!"
+)
+```
+
+---
+
+## createChatInviteLink
+
+Use this method to create an additional invite link for a chat.
+
+```python TPY Example
+result = Bot.createChatInviteLink(
+    chat_id=group_id,
+    member_limit=10 # Link expires after 10 uses
+)
+
+Bot.sendMessage(u, f"Your invite link: {result['invite_link']}")
+```

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Bots Limited",
+  "colors": {
+    "primary": "#F97316",
+    "light": "#FB923C",
+    "dark": "#EA580C"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "pages": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "index",
+          "getting-started/quickstart"
+        ]
+      },
+      {
+        "group": "Language Reference",
+        "pages": [
+          "reference/commands",
+          "reference/tpy-syntax"
+        ]
+      },
+      {
+        "group": "Telegram API Methods",
+        "pages": [
+          "reference/api-messages",
+          "reference/api-media",
+          "reference/api-chats",
+          "reference/api-keyboards",
+          "reference/api-advanced"
+        ]
+      },
+      {
+        "group": "Core Libraries (Libs)",
+        "pages": [
+          "libraries/bot-wrapper"
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Editor",
+          "href": "https://bots.lt",
+          "icon": "code"
+        },
+        {
+          "anchor": "Community",
+          "href": "https://t.me/bots_lt",
+          "icon": "telegram"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "https://t.me/bots_lt"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://bots.lt"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "telegram": "https://t.me/bots_lt",
+      "github": "https://github.com/JSOrganizations/BotPlatform"
+    }
+  }
+}

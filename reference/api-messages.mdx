@@ -1,0 +1,93 @@
+---
+title: 'Sending Messages'
+description: 'Telegram API methods for sending, editing, and forwarding text messages.'
+---
+
+## sendMessage
+
+Use this method to send text messages.
+
+```python TPY Example
+Bot.sendMessage(
+    chat_id=u,
+    text="<b>Hello</b> <i>World</i>!",
+    parse_mode="HTML",
+    reply_to_message_id=message.message_id
+)
+```
+
+**Parameters**:
+- `chat_id` *(Integer|String)*: Unique identifier for the target chat.
+- `text` *(String)*: Text of the message to be sent, 1-4096 characters.
+- `parse_mode` *(String)*: `HTML` or `MarkdownV2`.
+- `reply_to_message_id` *(Integer)*: If the message is a reply, ID of the original message.
+
+---
+
+## editMessageText
+
+Use this method to edit text and game messages.
+
+```python TPY Example
+Bot.editMessageText(
+    chat_id=u,
+    message_id=message.message_id,
+    text="Edited text!"
+)
+```
+
+---
+
+## deleteMessage
+
+Use this method to delete a message, including service messages.
+
+```python TPY Example
+Bot.deleteMessage(
+    chat_id=u,
+    message_id=message.message_id
+)
+```
+
+---
+
+## forwardMessage
+
+Use this method to forward messages of any kind. Service messages can't be forwarded.
+
+```python TPY Example
+Bot.forwardMessage(
+    chat_id=target_channel_id,
+    from_chat_id=u,
+    message_id=message.message_id
+)
+```
+
+---
+
+## copyMessage
+
+Use this method to copy messages of any kind. Service messages and invoice messages can't be copied. A quiz poll can be copied only if the value of the field `correct_option_id` is known to the bot. The method is analogous to the method `forwardMessage`, but the copied message doesn't have a link to the original message.
+
+```python TPY Example
+Bot.copyMessage(
+    chat_id=target_channel_id,
+    from_chat_id=u,
+    message_id=message.message_id,
+    caption="Copied with new caption!"
+)
+```
+
+---
+
+## sendChatAction
+
+Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status).
+
+```python TPY Example
+# Show "typing..."
+Bot.sendChatAction(chat_id=u, action="typing")
+
+# Show "uploading photo..."
+Bot.sendChatAction(chat_id=u, action="upload_photo")
+```
