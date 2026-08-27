@@ -201,6 +201,37 @@ Bot.sendDocument(chat_id=u, document=file, caption="📊 Bot Users Report")
 
 ---
 
+### Account Scope Details
+
+The `Account` object allows you to store data at the developer account level, making it accessible across **all bots** you own. 
+
+You can use all standard KV methods on the `Account` object (`Account.saveData`, `Account.getData`, `Account.deleteData`, `Account.getDataFile`, `Account.getAllData`). 
+
+```python BLP Example
+# Save settings across all your bots
+result = Account.saveData("global_settings", {"theme": "dark", "notifications": True})
+Bot.sendMessage(chat_id=u, text=f"Save result: {result['result']}")
+
+# Retrieve it from ANY of your bots
+settings = Account.getData("global_settings")
+Bot.sendMessage(chat_id=u, text=f"Theme: {settings['theme']}")
+```
+
+#### Account.info
+
+Returns basic account information for the developer.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| *(none)* | — | — | No parameters. |
+
+```python BLP Example
+info = Account.info()
+Bot.sendMessage(chat_id=u, text=f"Account plan: {info.plan}, Points left: {info.points_left}")
+```
+
+---
+
 ## 2. Numeric Data (Resources)
 
 Manage virtual balances, point systems, and leaderboards — without writing any database queries. This is the recommended way to handle **numbers and math-based data**.
@@ -252,10 +283,23 @@ Bot.sendMessage(chat_id=u, text="\n".join(lines))
 ```
 
 ```python BLP Example (Shared Global Counter)
-# Increment a global visits counter
+# Increment a global visits counter for a single bot
 visits = Libs.Resources.globalRes("total_visits")
 visits.add(1)
 Bot.sendMessage(chat_id=u, text=f"Total bot visits: {visits.value()}")
+```
+
+```python BLP Example (Account Resource)
+# Share a point pool across ALL bots you own
+account_points = Libs.Resources.accountRes("subscription_points")
+
+# Add points
+new_value = account_points.add(100)
+Bot.sendMessage(chat_id=u, text=f"Added points. New value: {new_value}")
+
+# Use points
+account_points.cut(50)
+Bot.sendMessage(chat_id=u, text=f"Used 50 points. Remaining: {account_points.value()}")
 ```
 
 ---
