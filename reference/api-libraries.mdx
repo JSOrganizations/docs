@@ -1,141 +1,334 @@
 ---
 title: 'Global Libraries (Libs)'
-description: 'Built-in libraries for dates, math, resources, and crypto.'
+description: 'Built-in libraries for random generation, date/time, virtual resources, cryptocurrency prices, and webhooks.'
 ---
 
-Bots.LT provides a powerful set of built-in libraries globally injected under the `Libs` object. These libraries allow you to handle time, random generation, virtual balances, and even cryptocurrency prices securely.
+Bots.LT injects a powerful set of built-in libraries globally under the `Libs` object. **No imports needed.**
 
 ---
 
-## 1. Libs.Random
+## Libs.Random
 
-Use this library to generate random numbers and strings.
+Generate random values for referral codes, tokens, dice rolls, and more.
 
-### `randomInt(min, max)`
+### randomInt
+
 Generates a random integer between `min` and `max` (inclusive).
 
-```python BLP Example
-dice_roll = Libs.Random.randomInt(1, 6)
-Bot.sendMessage(chat_id=u, text=f"You rolled a {dice_roll}!")
-```
-
-### `randomStr(length)`
-Generates a random alphanumeric string of the specified `length`.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `min` | Integer | Yes | Minimum value (inclusive). |
+| `max` | Integer | Yes | Maximum value (inclusive). |
 
 ```python BLP Example
-referral_code = Libs.Random.randomStr(8)
+# Roll a dice
+roll = Libs.Random.randomInt(1, 6)
+Bot.sendMessage(chat_id=u, text=f"You rolled: {roll} 🎲")
+
+# Random reward amount between 10 and 100
+reward = Libs.Random.randomInt(10, 100)
+Bot.sendMessage(chat_id=u, text=f"You won {reward} coins!")
 ```
-
-### `randomFloat()`
-Generates a random floating-point number between 0.0 and 1.0.
-
-### `randomAscii(length)`
-Generates a random string containing all ASCII letters of the specified `length`.
 
 ---
 
-## 2. Libs.DateAndTime
+### randomStr
 
-Use this library to get the current date and time.
+Generates a random alphanumeric string.
 
-> [!CAUTION]
-> For security and performance reasons, standard Python sleep methods like `time.sleep()` are strictly disabled.
-
-### `now(timezone_str)`
-Returns a dictionary with the current time, date, and exact ISO format for a specific timezone (e.g., "Asia/Dhaka"). If no timezone is provided, it uses the server's default timezone.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `length` | Integer | Yes | Length of the string to generate. |
 
 ```python BLP Example
-current_time = Libs.DateAndTime.now("Asia/Dhaka")
-Bot.sendMessage(chat_id=u, text=f"Current date: {current_time['date']} \nTime: {current_time['time']}")
+# Generate a referral code
+ref_code = Libs.Random.randomStr(8)
+User.saveData("referral_code", ref_code)
+Bot.sendMessage(chat_id=u, text=f"Your referral code: {ref_code}")
+
+# Generate a temporary password
+temp_pass = Libs.Random.randomStr(12)
 ```
 
-### `utcnow()`
-Returns a dictionary with the current UTC time.
+---
 
-### `date_now()`
-Returns just the current date as a string (YYYY-MM-DD).
+### randomFloat
 
-### `time()`
+Generates a random floating-point number between `0.0` and `1.0`.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| *(none)* | — | — | No parameters. |
+
+```python BLP Example
+chance = Libs.Random.randomFloat()
+if chance > 0.5:
+    Bot.sendMessage(chat_id=u, text="You won the coin flip! ✅")
+else:
+    Bot.sendMessage(chat_id=u, text="Better luck next time! ❌")
+```
+
+---
+
+### randomAscii
+
+Generates a random string using all ASCII letters (including uppercase).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `length` | Integer | Yes | Length of the string. |
+
+```python BLP Example
+secret_key = Libs.Random.randomAscii(16)
+Bot.saveData("api_secret", secret_key)
+```
+
+---
+
+## Libs.DateAndTime
+
+Get current date and time in any timezone.
+
+> **Note:** `time.sleep()` and standard Python sleep methods are **blocked** on the BLP platform. Use `Bot.runCommandAfter(seconds, command)` for delays.
+
+### now
+
+Returns a detailed time object for a specific timezone.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `timezone_str` | String | No | Timezone name (e.g., `"Asia/Dhaka"`, `"America/New_York"`). Defaults to server timezone. |
+
+**Returns** a dictionary with keys: `date`, `time`, `datetime`, `timestamp`, `year`, `month`, `day`, `hour`, `minute`, `second`, `weekday`.
+
+```python BLP Example
+now = Libs.DateAndTime.now("Asia/Dhaka")
+Bot.sendMessage(
+    chat_id=u,
+    text=f"📅 Date: {now['date']}\n🕐 Time: {now['time']}"
+)
+
+# Use timestamp for expiry logic
+ts = now['timestamp']
+User.saveData("last_active", ts)
+```
+
+---
+
+### utcnow
+
+Returns the current UTC time as a dictionary.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| *(none)* | — | — | No parameters. |
+
+```python BLP Example
+utc = Libs.DateAndTime.utcnow()
+Bot.sendMessage(chat_id=u, text=f"UTC Time: {utc['time']}")
+```
+
+---
+
+### date_now
+
+Returns only the current date as a formatted string `YYYY-MM-DD`.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| *(none)* | — | — | No parameters. |
+
+```python BLP Example
+today = Libs.DateAndTime.date_now()
+User.saveData("joined_date", today)
+Bot.sendMessage(chat_id=u, text=f"Your join date: {today}")
+```
+
+---
+
+### time (UNIX Timestamp)
+
 Returns the current UNIX timestamp (seconds since epoch) as an integer.
 
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| *(none)* | — | — | No parameters. |
+
+```python BLP Example
+current_ts = Libs.DateAndTime.time()
+
+# Check if user's subscription is still valid
+expiry = User.getData("subscription_expiry")
+if expiry and current_ts < int(expiry):
+    Bot.sendMessage(chat_id=u, text="✅ Subscription active!")
+else:
+    Bot.sendMessage(chat_id=u, text="❌ Subscription expired.")
+```
+
 ---
 
-## 3. Libs.Resources
+## Libs.Resources
 
-The Resources library allows you to easily manage virtual balances, point systems, and leaderboards without writing complex database queries.
+Manage virtual balances, point systems, and leaderboards — without writing any database queries.
 
 ### Accessing Resources
 
-- **`Libs.Resources.userRes(name)`**: Gets or creates a resource for the *current user*.
-- **`Libs.Resources.anotherRes(name, user_id)`**: Accesses a resource for a *specific user*.
-- **`Libs.Resources.globalRes(name)`**: Accesses a global resource for the *entire bot*.
+| Method | Description |
+|--------|-------------|
+| `Libs.Resources.userRes(name)` | Resource for the **current user**. |
+| `Libs.Resources.anotherRes(name, user_id)` | Resource for a **specific user** (by `user_id`). |
+| `Libs.Resources.globalRes(name)` | Shared resource for the **entire bot**. |
 
 ### Resource Methods
 
-Once you access a resource, you can manipulate it using these methods:
+Once accessed, each resource object supports:
 
-- **`.value()`**: Returns the current value as an integer or float.
-- **`.add(amount)`**: Adds the amount to the resource.
-- **`.cut(amount)`**: Subtracts the amount from the resource.
-- **`.set(amount)`**: Hard-sets the resource to a specific amount.
-- **`.reset()`**: Resets the resource to `0`.
+| Method | Description |
+|--------|-------------|
+| `.value()` | Returns current value as Integer or Float. |
+| `.add(amount)` | Adds `amount` to the resource. |
+| `.cut(amount)` | Subtracts `amount` from the resource. |
+| `.set(amount)` | Sets resource to an exact value. |
+| `.reset()` | Resets value to `0`. |
 
 ```python BLP Example
-balance = Libs.Resources.userRes("coins")
+# Get current user's coins
+coins = Libs.Resources.userRes("coins")
 
-# Check balance
-current = balance.value()
-Bot.sendMessage(chat_id=u, text=f"You have {current} coins.")
+current = coins.value()
+Bot.sendMessage(chat_id=u, text=f"💰 You have {current} coins")
 
-# Add 50 coins
-balance.add(50)
+# Reward coins
+coins.add(50)
 
-# Deduct 10 coins
-balance.cut(10)
+# Deduct coins
+if coins.value() >= 10:
+    coins.cut(10)
+    Bot.sendMessage(chat_id=u, text="You spent 10 coins!")
+else:
+    Bot.sendMessage(chat_id=u, text="Not enough coins!")
+```
+
+```python BLP Example (Leaderboard)
+# Get the top 10 users by "points"
+top = Libs.Resources.getTop("points", limit=10)
+lines = [f"{i+1}. User {r['user_id']}: {r['value']} pts" for i, r in enumerate(top)]
+Bot.sendMessage(chat_id=u, text="\n".join(lines))
+```
+
+```python BLP Example (Shared Global Counter)
+# Increment a global visits counter
+visits = Libs.Resources.globalRes("total_visits")
+visits.add(1)
+Bot.sendMessage(chat_id=u, text=f"Total bot visits: {visits.value()}")
 ```
 
 ---
 
-## 4. Libs.Crypto
+## Libs.Crypto
 
-Use this library to reliably fetch real-time cryptocurrency and fiat prices. It uses multiple APIs (Coinbase, Binance, Kucoin) with automatic fallbacks.
+Fetch real-time cryptocurrency prices with automatic fallbacks across multiple APIs (Coinbase, Binance, KuCoin).
 
-### `get_price(from_coin, to_coin)`
-Fetches the current price of a cryptocurrency. Defaults to USD.
+### get_price
+
+Gets the current price of a cryptocurrency.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `from_coin` | String | Yes | Coin symbol (e.g., `"BTC"`, `"ETH"`, `"TRX"`). |
+| `to_coin` | String | No | Target currency. Default: `"USD"`. |
 
 ```python BLP Example
-btc_price = Libs.Crypto.get_price("BTC", "USD")
-Bot.sendMessage(chat_id=u, text=f"1 BTC is currently worth ${btc_price}")
+btc = Libs.Crypto.get_price("BTC", "USD")
+Bot.sendMessage(chat_id=u, text=f"₿ Bitcoin: ${btc:,.2f}")
 ```
 
-### `convert(from_coin, to_coin, amount)`
+---
+
+### convert
+
 Converts an amount from one currency to another.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `from_coin` | String | Yes | Source coin symbol. |
+| `to_coin` | String | Yes | Target currency. |
+| `amount` | Float | Yes | Amount to convert. |
 
 ```python BLP Example
 # Convert 500 TRX to USD
-usd_value = Libs.Crypto.convert("TRX", "USD", 500)
-```
+usd = Libs.Crypto.convert("TRX", "USD", 500)
+Bot.sendMessage(chat_id=u, text=f"500 TRX = ${usd:.2f}")
 
-### `get_coin_info(coin)`
-Fetches detailed 24-hour market stats for a specific coin (against USDT).
-Returns a dictionary containing `price`, `market_cap`, `volume_24h`, `change_24h` (percentage), `high_24h`, and `low_24h`.
-
-```python BLP Example
-info = Libs.Crypto.get_coin_info("ETH")
-Bot.sendMessage(chat_id=u, text=f"ETH 24h Change: {info['change_24h']}%")
+# Convert user's BTC balance to USD
+btc_balance = float(User.getData("btc_balance") or 0)
+usd_value = Libs.Crypto.convert("BTC", "USD", btc_balance)
+Bot.sendMessage(chat_id=u, text=f"Your BTC wallet ≈ ${usd_value:.2f}")
 ```
 
 ---
 
-## 5. Libs.Webhook
+### get_coin_info
 
-Use this library to generate secure webhook URLs for your bot commands.
+Returns detailed 24-hour market data for a coin.
 
-### `getUrlFor(command, user_id=None, chat_id=None, **options)`
-Generates an encrypted Webhook URL that, when accessed, triggers a specific command in your bot context.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `coin` | String | Yes | Coin symbol (e.g., `"BTC"`, `"ETH"`). |
+
+**Returns** a dictionary with: `price`, `market_cap`, `volume_24h`, `change_24h` (%), `high_24h`, `low_24h`.
 
 ```python BLP Example
-# Create a secure checkout URL that triggers /payment_success
-checkout_url = Libs.Webhook.getUrlFor("/payment_success", amount=100)
-Bot.sendMessage(chat_id=u, text=f"Pay here: {checkout_url}")
+info = Libs.Crypto.get_coin_info("ETH")
+Bot.sendMessage(
+    chat_id=u,
+    text=f"""📊 ETH Market Stats
+💰 Price: ${info['price']:,.2f}
+📈 24h Change: {info['change_24h']:.2f}%
+🔺 24h High: ${info['high_24h']:,.2f}
+🔻 24h Low: ${info['low_24h']:,.2f}
+📦 Volume: ${info['volume_24h']:,.0f}"""
+)
+```
+
+---
+
+## Libs.Webhook
+
+Generate secure, encrypted webhook URLs that trigger specific bot commands when accessed via HTTP.
+
+### getUrlFor
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `command` | String | Yes | Command to trigger (e.g., `"/payment_success"`). |
+| `user_id` | Integer | No | User ID for the triggered context. Defaults to current user. |
+| `chat_id` | Integer | No | Chat ID for the triggered context. |
+| `**options` | Any | No | Any additional key-value data passed to the command context. |
+
+```python BLP Example
+# Generate a payment webhook
+checkout_url = Libs.Webhook.getUrlFor(
+    "/payment_success",
+    user_id=u,
+    amount=99,
+    plan="premium"
+)
+
+Bot.sendMessage(
+    chat_id=u,
+    text=f"Complete payment here:\n{checkout_url}"
+)
+```
+
+```python BLP Example (Used with external payment gateway)
+# In /create_invoice
+invoice_url = Libs.Webhook.getUrlFor("/on_payment", user_id=u, order_id="ORD-123")
+# Pass invoice_url to your payment provider as the callback/IPN URL
+# When the payment succeeds, the provider calls invoice_url
+# which triggers /on_payment for this user
+
+# In /on_payment command
+order_id = options.get("order_id")
+Bot.sendMessage(chat_id=u, text=f"✅ Payment received for order {order_id}!")
 ```

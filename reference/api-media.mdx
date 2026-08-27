@@ -1,127 +1,244 @@
 ---
 title: 'Media & Files'
-description: 'Send photos, audio, documents, video, and grouped media.'
+description: 'Send photos, audio, documents, video, voice, and grouped media albums.'
 ---
 
-This section covers all media and file-related methods available in the Telegram Bot API.
+Media can be sent in **3 ways**:
+1. **By URL** — Provide an HTTP/HTTPS URL. Telegram downloads and sends it.
+2. **By File ID** — Reuse a file already uploaded to Telegram's servers.
+3. **By InputFile** — Upload raw bytes generated in your code (e.g., `User.getDataFile()`).
 
-## File Upload Methods
+---
 
-In Bots Limited (BLP), you can send media in three different ways:
+## sendPhoto
 
-1. **By URL:** Provide a direct HTTP/HTTPS URL. Telegram will download and send the file.
-2. **By File ID:** If the file is already on Telegram's servers, use its `file_id`.
-3. **By InputFile (Raw Bytes):** Use the `User.getDataFile()` or similar export methods to upload raw files dynamically from your backend.
+Sends a photo to a chat.
 
-## Sending Media
-
-### sendPhoto
-Use this method to send photos.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID or `@username`. |
+| `photo` | String | Yes | URL, file ID, or InputFile of the photo. |
+| `caption` | String | No | Photo caption (up to 1024 characters). |
+| `parse_mode` | String | No | `"HTML"`, `"Markdown"`, or `"MarkdownV2"`. |
+| `has_spoiler` | Boolean | No | If `True`, the photo is blurred until tapped. |
+| `disable_notification` | Boolean | No | Sends silently. |
+| `reply_to_message_id` | Integer | No | Reply to a specific message. |
+| `reply_markup` | Object | No | Inline or reply keyboard. |
 
 ```python BLP Example
+# By URL
 Bot.sendPhoto(
     chat_id=u,
     photo="https://example.com/image.jpg",
-    caption="Here is a **beautiful** photo!",
-    parse_mode="MarkdownV2"
+    caption="Here is a beautiful photo!",
+    parse_mode="HTML"
 )
-```
 
-```python BLP Example
+# By File ID (reuse an existing photo)
 Bot.sendPhoto(
     chat_id=u,
     photo="AgACAgIAAxkBAAMrZN...",
-    caption="Here is a photo from a file ID."
+    caption="Reusing an uploaded photo."
+)
+
+# With spoiler blur
+Bot.sendPhoto(
+    chat_id=u,
+    photo="https://example.com/surprise.jpg",
+    has_spoiler=True,
+    caption="Tap to reveal!"
 )
 ```
 
-### sendAudio
-Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .MP3 or .M4A format.
+---
+
+## sendAudio
+
+Sends an audio file displayed in Telegram's music player. Must be `.MP3` or `.M4A`.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `audio` | String | Yes | URL, file ID, or InputFile of the audio. |
+| `caption` | String | No | Caption (up to 1024 characters). |
+| `parse_mode` | String | No | Formatting mode. |
+| `duration` | Integer | No | Duration in seconds. |
+| `performer` | String | No | Name of the performer. |
+| `title` | String | No | Track title. |
+| `thumbnail` | String | No | Thumbnail image URL or file ID. |
 
 ```python BLP Example
 Bot.sendAudio(
     chat_id=u,
     audio="https://example.com/song.mp3",
-    caption="Listen to this song!",
+    caption="Listen to this track!",
     performer="Artist Name",
-    title="Song Title"
+    title="Song Title",
+    duration=210
 )
 ```
 
-### sendDocument
-Use this method to send general files.
+---
+
+## sendDocument
+
+Sends a general file.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `document` | String or InputFile | Yes | URL, file ID, or InputFile. |
+| `caption` | String | No | Caption (up to 1024 characters). |
+| `parse_mode` | String | No | Formatting mode. |
+| `thumbnail` | String | No | Thumbnail image. |
+| `disable_content_type_detection` | Boolean | No | Disables automatic content type detection. |
 
 ```python BLP Example
+# By URL
 Bot.sendDocument(
     chat_id=u,
     document="https://example.com/file.pdf",
     caption="Here is the PDF file."
 )
-```
 
-*Uploading a raw generated file using `InputFile`:*
-```python BLP Example
+# Upload a dynamically generated file
 file = User.getAllDataOfUser(u, output_format="json")
 Bot.sendDocument(
     chat_id=u,
     document=file,
-    caption="Here is your requested data export!"
+    caption="Your data export is ready!"
 )
 ```
 
-### sendVideo
-Use this method to send video files, Telegram clients support MP4 videos.
+---
+
+## sendVideo
+
+Sends a video file. Telegram clients support `.MP4` videos.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `video` | String | Yes | URL, file ID, or InputFile. |
+| `caption` | String | No | Caption (up to 1024 characters). |
+| `parse_mode` | String | No | Formatting mode. |
+| `duration` | Integer | No | Duration in seconds. |
+| `width` | Integer | No | Video width. |
+| `height` | Integer | No | Video height. |
+| `thumbnail` | String | No | Thumbnail image. |
+| `supports_streaming` | Boolean | No | If `True`, enables streaming playback. |
+| `has_spoiler` | Boolean | No | Blurs the video until tapped. |
 
 ```python BLP Example
 Bot.sendVideo(
     chat_id=u,
     video="https://example.com/video.mp4",
     caption="Check out this video!",
-    supports_streaming=True
+    supports_streaming=True,
+    width=1280,
+    height=720
 )
 ```
 
-### sendAnimation
-Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
+---
+
+## sendAnimation
+
+Sends an animation (GIF or H.264/MPEG-4 video without sound).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `animation` | String | Yes | URL, file ID, or InputFile. |
+| `caption` | String | No | Caption (up to 1024 characters). |
+| `parse_mode` | String | No | Formatting mode. |
+| `duration` | Integer | No | Duration in seconds. |
+| `width` | Integer | No | Animation width. |
+| `height` | Integer | No | Animation height. |
+| `has_spoiler` | Boolean | No | Blurs the animation until tapped. |
 
 ```python BLP Example
 Bot.sendAnimation(
     chat_id=u,
-    animation="https://example.com/animation.gif",
-    caption="Funny GIF!"
+    animation="https://example.com/funny.gif",
+    caption="Funny animation!"
 )
 ```
 
-### sendVoice
-Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. The audio must be in an .OGG file encoded with OPUS.
+---
+
+## sendVoice
+
+Sends a voice message. Audio must be in `.OGG` format encoded with OPUS.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `voice` | String | Yes | URL, file ID, or InputFile of the `.ogg` audio. |
+| `caption` | String | No | Caption. |
+| `parse_mode` | String | No | Formatting mode. |
+| `duration` | Integer | No | Duration in seconds. |
 
 ```python BLP Example
 Bot.sendVoice(
     chat_id=u,
     voice="https://example.com/voice.ogg",
-    caption="Voice message"
+    duration=30
 )
 ```
 
-### sendVideoNote
-Use this method to send video messages. Telegram clients display these as rounded, square-cropped videos of up to 1 minute long.
+---
+
+## sendVideoNote
+
+Sends a rounded video note (max 1 minute). Used as video messages in Telegram.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `video_note` | String | Yes | URL, file ID, or InputFile. Must be square. |
+| `duration` | Integer | No | Duration in seconds. |
+| `length` | Integer | No | Video width/height (equal for square videos). |
+| `thumbnail` | String | No | Thumbnail image. |
 
 ```python BLP Example
 Bot.sendVideoNote(
     chat_id=u,
-    video_note="https://example.com/video_note.mp4",
+    video_note="https://example.com/note.mp4",
     length=360,
-    duration=60
+    duration=30
 )
 ```
 
-### sendMediaGroup
-Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type.
+---
+
+## sendMediaGroup
+
+Sends a group of photos, videos, documents, or audios as an album.
+
+> **Note:** Only same-type media can be grouped together (e.g., only photos or only videos). Up to 10 items per group.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `media` | JSON String | Yes | A JSON-encoded array of `InputMedia` objects. |
+| `disable_notification` | Boolean | No | Sends silently. |
 
 ```python BLP Example
 media_group = [
-    {"type": "photo", "media": "https://example.com/photo1.jpg"},
-    {"type": "photo", "media": "https://example.com/photo2.jpg", "caption": "Album caption"}
+    {
+        "type": "photo",
+        "media": "https://example.com/photo1.jpg",
+        "caption": "Photo 1"
+    },
+    {
+        "type": "photo",
+        "media": "https://example.com/photo2.jpg"
+    },
+    {
+        "type": "photo",
+        "media": "https://example.com/photo3.jpg"
+    }
 ]
 
 Bot.sendMediaGroup(
@@ -132,10 +249,18 @@ Bot.sendMediaGroup(
 
 ---
 
-## Editing Media
+## editMessageMedia
 
-### editMessageMedia
-Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise.
+Edits the media content of an existing message (animation, audio, document, photo, or video).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Chat ID of the message to edit. |
+| `message_id` | Integer | Yes | ID of the message to edit. |
+| `media` | JSON String | Yes | JSON-encoded `InputMedia` object with the new media. |
+| `reply_markup` | Object | No | New inline keyboard to attach. |
+
+**InputMedia types:** `photo`, `video`, `animation`, `audio`, `document`
 
 ```python BLP Example
 new_media = {
@@ -149,4 +274,45 @@ Bot.editMessageMedia(
     message_id=message.message_id,
     media=jsondumps(new_media)
 )
+```
+
+---
+
+## sendSticker
+
+Sends a static or animated `.WEBP` sticker.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `sticker` | String | Yes | File ID of the sticker. |
+| `emoji` | String | No | Emoji associated with the sticker. |
+| `reply_to_message_id` | Integer | No | Reply to a message. |
+
+```python BLP Example
+# Get sticker file_id from a received sticker message
+sticker_id = message.sticker.file_id
+
+Bot.sendSticker(
+    chat_id=u,
+    sticker=sticker_id
+)
+```
+
+---
+
+## getFile
+
+Gets basic info about a file and prepares it for downloading.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `file_id` | String | Yes | File identifier to get info about. |
+
+```python BLP Example
+result = Bot.getFile(file_id=message.document.file_id)
+file_path = result.result.file_path
+download_url = f"https://api.telegram.org/file/bot{bot_token}/{file_path}"
+
+Bot.sendMessage(chat_id=u, text=f"Download: {download_url}")
 ```

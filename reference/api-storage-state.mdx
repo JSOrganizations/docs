@@ -1,79 +1,246 @@
 ---
 title: 'Data Storage & Wait States'
-description: 'Save user data and handle multi-step conversational flows.'
+description: 'Save and retrieve user/bot/global data and handle multi-step conversational flows.'
 ---
 
-Bots.LT provides a robust Key-Value (KV) storage system and Wait State managers. You do not need an external database to build complex bots!
+Bots.LT provides a built-in **Key-Value (KV) store** with three scopes and a **wait state** system for multi-step conversations. No external database is needed.
 
-## Data Storage (KV Store)
+---
 
-You can save and retrieve data across three different scopes: `User`, `Bot`, and `Api`.
+## Data Storage
 
-### Storage Methods
+Data is stored and retrieved using three scope objects, each with the same set of methods.
 
-The following methods are available on all scopes:
+### Scopes
 
-- **`saveData(key, value)`**: Saves a value to the database. (Aliases: `setProperty`, `setProp`)
-- **`getData(key)`**: Retrieves a value from the database. (Aliases: `getProperty`, `getProp`)
-- **`deleteData(key)`**: Deletes a value from the database. (Aliases: `deleteProperty`, `deleteProp`)
+| Scope | Object | Description |
+|-------|--------|-------------|
+| **User** | `User` | Data stored per user (keyed by `user_id`). Each user has their own isolated data. |
+| **Bot** | `Bot` | Data stored globally for the entire bot. Shared across all users. |
+| **Api** | `Api` | Data shared across multiple bots owned by the same developer. |
+
+---
+
+### saveData
+
+Saves a value to the KV store.
+
+**Aliases:** `setProperty`, `setProp`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | String | Yes | The key name to store data under. |
+| `value` | Any | Yes | The value to store. Can be string, number, list, or dict. |
 
 ```python BLP Example
-# Using standard methods
-User.saveData("language", "English")
-lang = User.getData("language")
+# Store user data
+User.saveData("name", "John Doe")
+User.saveData("balance", 1000)
+User.saveData("settings", {"theme": "dark", "lang": "en"})
 
-# Using short aliases
-User.setProp("theme", "dark")
-theme = User.getProp("theme")
+# Store bot-wide data
+Bot.saveData("total_users", 5000)
+Bot.saveData("announcement", "New features launched!")
+
+# Using aliases
+User.setProperty("language", "English")
+User.setProp("level", 5)
+```
+
+---
+
+### getData
+
+Retrieves a stored value from the KV store. Returns `None` if key does not exist.
+
+**Aliases:** `getProperty`, `getProp`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | String | Yes | The key to retrieve. |
+
+```python BLP Example
+# Get user data
+name = User.getData("name")
+balance = User.getData("balance")
+
+if name:
+    Bot.sendMessage(chat_id=u, text=f"Welcome back, {name}!")
+else:
+    Bot.sendMessage(chat_id=u, text="You haven't set a name yet.")
+
+# Using aliases
+level = User.getProperty("level")
+lang = User.getProp("language")
+```
+
+---
+
+### deleteData
+
+Deletes a key from the KV store.
+
+**Aliases:** `deleteProperty`, `deleteProp`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | String | Yes | The key to delete. |
+
+```python BLP Example
+User.deleteData("temp_token")
+
+# Using aliases
+User.deleteProperty("session_id")
+User.deleteProp("otp_code")
+```
+
+---
+
+### getDataFile
+
+Exports a stored value as a downloadable file.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | The key to export. |
+| `output_format` | String | No | `"txt"` or `"json"`. Default: `"txt"`. |
+
+```python BLP Example
+file = User.getDataFile("settings", output_format="json")
+Bot.sendDocument(chat_id=u, document=file, caption="Your settings export")
+```
+
+---
+
+### getAllData
+
+Gets all stored keys matching a pattern and returns them as a file.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Pattern to match keys (partial match). |
+| `output_format` | String | No | `"json"` or `"txt"`. Default: `"json"`. |
+
+```python BLP Example
+# Export all user data keys containing "order"
+file = User.getAllData("order", output_format="json")
+Bot.sendDocument(chat_id=u, document=file, caption="Your order history")
+
+# Export all bot-wide data
+file = Bot.getAllData("", output_format="json")
+Bot.sendDocument(chat_id=u, document=file)
+```
+
+---
+
+### getAllDataOfUser
+
+Exports all data stored for a specific user.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user` | Integer | Yes | The user ID to export data for. |
+| `output_format` | String | No | `"json"` or `"txt"`. Default: `"json"`. |
+
+> **Note:** This method is available on the `User` scope only.
+
+```python BLP Example
+file = User.getAllDataOfUser(u, output_format="json")
+Bot.sendDocument(
+    chat_id=u,
+    document=file,
+    caption="📦 All your data from this bot"
+)
+```
+
+---
+
+### getBotUsersFile
+
+Exports the full list of users who have interacted with the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `output_format` | String | No | `"json"` or `"csv"`. Default: `"json"`. |
+| `include_creation_date` | Boolean | No | If `True`, includes the date the user first interacted. |
+| `include_last_active_date` | Boolean | No | If `True`, includes the last activity date. |
+
+> **Note:** Available on the `Bot` scope only.
+
+```python BLP Example
+# Export as JSON
+file = Bot.getBotUsersFile(output_format="json")
+Bot.sendDocument(chat_id=u, document=file)
+
+# Export as CSV with dates
+file = Bot.getBotUsersFile(
+    output_format="csv",
+    include_creation_date=True,
+    include_last_active_date=True
+)
+Bot.sendDocument(chat_id=u, document=file, caption="📊 Bot Users Report")
 ```
 
 ---
 
 ## Wait States (Conversational Flows)
 
-Often, you need to ask a user a question and "wait" for their next message (e.g., asking for a name, email, or amount). You can handle this easily using **Wait States**.
+Use wait states to build **multi-step conversations** — asking users for input one step at a time, like forms, quizzes, or registration wizards.
 
-### `Bot.handleNextCommand(command, **options)`
+### Bot.handleNextCommand
 
-This method tells the bot: *"When this user sends their very next message, immediately route it to the specified command, regardless of what they typed."*
+Routes the user's **next message** to a specific command, regardless of what they type.
 
-#### Basic Example
-Imagine you have two commands: `/start` and `/save_name`.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `command_name` | String | Yes | Command to trigger on next user message (e.g., `"/save_name"`). |
+| `options` | Dict | No | Optional data dictionary forwarded to the next command. Access via `options.get("key")`. |
+| `cancel_at_command` | Boolean | No | If `True`, wait state is cancelled when user sends a new command like `/start`. Default: `True`. |
 
-**Command 1: `/start`**
-```python BLP Example
-Bot.sendMessage(chat_id=u, text="Please enter your full name:")
-
-# Route the user's next message to the /save_name command
+```python BLP Example (2-step registration)
+# Command: /start
+Bot.sendMessage(chat_id=u, text="👋 What is your name?")
 Bot.handleNextCommand("/save_name")
-```
 
-**Command 2: `/save_name`**
-```python BLP Example
-# message.text contains whatever they typed
+# Command: /save_name
 name = message.text
 User.saveData("name", name)
-Bot.sendMessage(chat_id=u, text=f"Thanks, {name}! Your name has been saved.")
+Bot.sendMessage(chat_id=u, text=f"✅ Hello, {name}! Now enter your email:")
+Bot.handleNextCommand("/save_email", {"name": name})
+
+# Command: /save_email
+name = options.get("name")
+email = message.text
+User.saveData("email", email)
+Bot.sendMessage(
+    chat_id=u,
+    text=f"✅ Registration complete!\nName: {name}\nEmail: {email}"
+)
 ```
 
-#### Passing Data Between Commands (Options)
-You can forward temporary data to the next command by passing it as keyword arguments (`**options`).
+```python BLP Example (Passing data between steps)
+# Step 1: /ask_amount
+Bot.sendMessage(chat_id=u, text="How many coins do you want to buy?")
+Bot.handleNextCommand(
+    "/confirm_purchase",
+    {"product": "Premium Pack", "price_per": 10},
+    cancel_at_command=True
+)
 
-**Command 1: `/ask_age`**
-```python BLP Example
-Bot.sendMessage(chat_id=u, text="How old are you?")
+# Step 2: /confirm_purchase
+amount = int(message.text)
+product = options.get("product")
+price_per = options.get("price_per")
+total = amount * price_per
 
-# Pass temporary data (e.g., step=2) to the next command
-Bot.handleNextCommand("/save_age", step=2, temp_name="John")
+keyboard = [[
+    InlineKeyboardButton(text="✅ Confirm", callback_data=f"buy_{amount}"),
+    InlineKeyboardButton(text="❌ Cancel", callback_data="cancel")
+]]
+
+Bot.sendMessage(
+    chat_id=u,
+    text=f"Buy {amount}x {product} for {total} coins?",
+    reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
+)
 ```
-
-**Command 2: `/save_age`**
-```python BLP Example
-# Access the passed options globally via the `options` dictionary
-step = options.get("step")
-temp_name = options.get("temp_name")
-
-Bot.sendMessage(chat_id=u, text=f"Step {step}: {temp_name} is {message.text} years old.")
-```
-
-*Note: Wait states are extremely powerful for building multi-step forms, quizzes, and registration flows without needing complex database flags.*

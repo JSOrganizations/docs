@@ -1,85 +1,188 @@
 ---
 title: 'Keyboards & Buttons'
-description: 'Build interactive inline and reply keyboards.'
+description: 'Build interactive inline keyboards, reply keyboards, and handle callback queries.'
 ---
 
-This section covers how to create and send interactive keyboards using the native Bot API classes available in the BLP environment.
+BLP provides **native keyboard classes** that you can use directly — no imports needed. Keyboards are attached to messages via the `reply_markup` parameter.
+
+---
 
 ## Inline Keyboards
 
-Inline keyboards appear attached to the message itself and can trigger callbacks or open URLs.
+Inline keyboards appear **attached to the message** itself. Buttons can open URLs, trigger callback queries, open web apps, or send inline queries.
 
-### Sending an Inline Keyboard
+### InlineKeyboardButton
 
-To send an inline keyboard, you need to construct a two-dimensional array of `InlineKeyboardButton` objects and wrap it in an `InlineKeyboardMarkup`.
+Represents a single button inside an inline keyboard.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `text` | String | Yes | Button label shown to the user. |
+| `url` | String | No | HTTP URL to open when button is pressed. |
+| `callback_data` | String | No | Data sent back to the bot in a callback query (up to 64 bytes). |
+| `web_app` | String | No | URL of a Telegram Web App to launch. |
+| `switch_inline_query` | String | No | Opens inline query prompt in a chosen chat. |
+| `switch_inline_query_current_chat` | String | No | Inserts inline query in the current chat. |
+
+### InlineKeyboardMarkup
+
+Wraps a 2D array of `InlineKeyboardButton` objects.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `inline_keyboard` | Array of Arrays | Yes | 2D array of `InlineKeyboardButton` objects. Each inner array is a row. |
 
 ```python BLP Example
+# Basic inline keyboard with URL and callback buttons
 keyboard = [
     [
-        InlineKeyboardButton(text="Google", url="https://google.com"),
+        InlineKeyboardButton(text="Visit Website", url="https://bots.lt"),
         InlineKeyboardButton(text="Click Me!", callback_data="btn_clicked")
     ],
     [
-        InlineKeyboardButton(text="Open Web App", web_app="https://bots.lt")
+        InlineKeyboardButton(text="Open Mini App", web_app="https://bots.lt")
+    ],
+    [
+        InlineKeyboardButton(text="Search Inline", switch_inline_query="hello")
     ]
 ]
 
 Bot.sendMessage(
     chat_id=u,
-    text="Here is an inline keyboard:",
+    text="Choose an option:",
     reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
 )
 ```
 
-### Answering Callback Queries (answerCallbackQuery)
+---
 
-When a user clicks an inline button containing `callback_data`, your bot will receive a `callback_query` update. You **must** answer this query using `answerCallbackQuery` to stop the loading icon on the user's button.
+## answerCallbackQuery
+
+When a user taps an inline button with `callback_data`, the bot receives a **callback query**. You **must** answer it to stop the loading icon on the button.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `callback_query_id` | String | Yes | Unique ID of the callback query. Use `call.id`. |
+| `text` | String | No | Notification text shown to the user (up to 200 characters). |
+| `show_alert` | Boolean | No | If `True`, shows a full alert popup instead of a toast notification. |
+| `url` | String | No | URL to open. Only works for game callbacks. |
+| `cache_time` | Integer | No | Max seconds the result is cached client-side. Default: `0`. |
 
 ```python BLP Example
+# In your callback handler command (triggered when call.data matches)
 if call.data == "btn_clicked":
     Bot.answerCallbackQuery(
         callback_query_id=call.id,
         text="You clicked the button!",
         show_alert=True
     )
+
+# Edit the message after callback
+if call.data == "btn_confirm":
+    Bot.answerCallbackQuery(callback_query_id=call.id)
+    Bot.editMessageText(
+        chat_id=u,
+        message_id=message.message_id,
+        text="Confirmed!",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[])
+    )
 ```
 
 ---
 
-## Reply Keyboards (Custom Keyboards)
+## Reply Keyboards
 
-Reply keyboards replace the user's default keyboard with custom buttons. These buttons send plain text messages when tapped.
+Reply keyboards replace the user's default keyboard with custom buttons. When tapped, they **send the button text as a message**.
 
-### Sending a Reply Keyboard
+### KeyboardButton
 
-Use `KeyboardButton` and `ReplyKeyboardMarkup`.
+Represents a single button in a reply keyboard.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `text` | String | Yes | Button label (sent as text when tapped). |
+| `request_contact` | Boolean | No | If `True`, sends the user's phone number. |
+| `request_location` | Boolean | No | If `True`, sends the user's current location. |
+| `web_app` | String | No | URL of a Web App to launch. |
+
+### ReplyKeyboardMarkup
+
+Wraps a 2D array of `KeyboardButton` objects.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `keyboard` | Array of Arrays | Yes | 2D array of `KeyboardButton` objects. |
+| `resize_keyboard` | Boolean | No | If `True`, shrinks the keyboard to fit. Default: `False`. |
+| `one_time_keyboard` | Boolean | No | If `True`, hides keyboard after one use. Default: `False`. |
+| `input_field_placeholder` | String | No | Placeholder text in the message input field. |
+| `selective` | Boolean | No | If `True`, shows keyboard only to mentioned users. |
 
 ```python BLP Example
 keyboard = [
-    [KeyboardButton(text="Button 1"), KeyboardButton(text="Button 2")],
-    [KeyboardButton(text="Share Contact", request_contact=True)],
-    [KeyboardButton(text="Share Location", request_location=True)]
+    [KeyboardButton(text="🏠 Home"), KeyboardButton(text="⚙️ Settings")],
+    [KeyboardButton(text="📞 Share Contact", request_contact=True)],
+    [KeyboardButton(text="📍 Share Location", request_location=True)]
 ]
 
 Bot.sendMessage(
     chat_id=u,
-    text="Please choose an option:",
+    text="Welcome! Choose an option:",
     reply_markup=ReplyKeyboardMarkup(
         keyboard=keyboard,
-        resize_keyboard=True, # Makes the keyboard smaller
-        one_time_keyboard=True # Hides after one use
+        resize_keyboard=True,
+        one_time_keyboard=False,
+        input_field_placeholder="Type or tap a button..."
     )
 )
 ```
 
-### Removing a Reply Keyboard
+---
 
-To remove a custom reply keyboard and restore the user's default typing keyboard, use `ReplyKeyboardRemove`.
+## ReplyKeyboardRemove
+
+Removes the custom reply keyboard and restores the default Telegram keyboard.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `remove_keyboard` | Boolean | Yes | Must be `True`. |
+| `selective` | Boolean | No | If `True`, removes keyboard only for specific users. |
 
 ```python BLP Example
 Bot.sendMessage(
     chat_id=u,
-    text="Removing keyboard...",
+    text="Keyboard removed.",
     reply_markup=ReplyKeyboardRemove(remove_keyboard=True)
+)
+```
+
+---
+
+## editMessageReplyMarkup
+
+Updates the inline keyboard of an existing message without changing the message text.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Chat ID of the message. |
+| `message_id` | Integer | Yes | ID of the message to edit. |
+| `reply_markup` | Object | No | New inline keyboard. Pass an empty keyboard to remove it. |
+
+```python BLP Example
+# Update the keyboard to show a "Done" button
+new_keyboard = [
+    [InlineKeyboardButton(text="✅ Done", callback_data="done")]
+]
+
+Bot.editMessageReplyMarkup(
+    chat_id=u,
+    message_id=message.message_id,
+    reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard)
+)
+
+# Remove the keyboard entirely
+Bot.editMessageReplyMarkup(
+    chat_id=u,
+    message_id=message.message_id,
+    reply_markup=InlineKeyboardMarkup(inline_keyboard=[])
 )
 ```

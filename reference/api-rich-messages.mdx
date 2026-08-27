@@ -1,40 +1,63 @@
 ---
 title: 'Rich Messages'
-description: 'Send and handle advanced structured formatting like slideshows, collages, tables, and custom UI components.'
+description: 'Send advanced structured messages with HTML/Markdown formatting, slideshows, tables, buttons, and streaming drafts.'
 ---
 
-Rich messages in Telegram support advanced structured formatting options like headings, lists, tables, media collages, block quotations, collapsible blocks, footnotes, and mathematical formulas.
+Rich messages support advanced structured formatting like headings, lists, tables, media collages, block quotations, collapsible blocks, footnotes, and LaTeX formulas.
 
-Telegram clients will render them natively. You can specify rich message content using **Markdown-style** or **HTML-style** formatting.
+> **Limits:**
+> - Up to **32,768 UTF-8 characters** in the message text
+> - Up to **500 blocks** (including nested blocks)
+> - Up to **16 levels** of nesting
+> - Up to **50 media attachments**
+> - Up to **20 columns** in a table
 
 ---
 
 ## sendRichMessage
 
-Use this method to send rich messages. The BLP engine provides a straightforward way to send HTML or Markdown rich messages.
+Sends a rich formatted message. Use either `html`, `markdown`, or `blocks` in the `rich_message` object — not multiple.
 
-```python BLP Example (Basic HTML Table)
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID or `@username`. |
+| `rich_message` | Object | Yes | An `InputRichMessage` object (see below). |
+| `disable_notification` | Boolean | No | Sends silently. |
+| `protect_content` | Boolean | No | Prevents forwarding/saving. |
+| `reply_parameters` | Object | No | Message to reply to. |
+| `reply_markup` | Object | No | Inline keyboard to attach. |
+
+### InputRichMessage Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `html` | String | No* | Message content using HTML formatting. |
+| `markdown` | String | No* | Message content using Markdown formatting. |
+| `blocks` | Array | No* | Message content as an array of `InputRichBlock` objects. |
+| `is_rtl` | Boolean | No | If `True`, message is displayed right-to-left. |
+| `skip_entity_detection` | Boolean | No | If `True`, disables auto-detection of URLs, emails, hashtags, etc. |
+
+> **\*** Exactly one of `html`, `markdown`, or `blocks` must be provided.
+
+```python BLP Example (HTML Table)
 rich_html_content = """<table bordered>
   <caption>Student Information List</caption>
   <tr>
     <th>Roll</th>
-    <th>Class</th>
     <th>Name</th>
-    <th>Section</th>
+    <th>Class</th>
     <th>Status</th>
   </tr>
   <tr>
     <td><b>01</b></td>
-    <td>Class 10</td>
     <td>Mobassher Ahmed</td>
-    <td>A</td>
+    <td>Class 10</td>
     <td>Passed</td>
   </tr>
   <tr>
     <td><b>02</b></td>
-    <td>Class 10</td>
     <td>Humayun Kabir</td>
-    <td>A</td>
+    <td>Class 10</td>
     <td>Passed</td>
   </tr>
 </table>"""
@@ -49,53 +72,110 @@ Bot.sendRichMessage(
 )
 ```
 
-```python BLP Example (Advanced UI with Slideshow & Collapsible Details)
-rich_html_content = """
-<h1><tg-emoji emoji-id="6163613480936021313">🔒</tg-emoji> Hidely - Hide Photos & Videos</h1>
+```python BLP Example (HTML Slideshow + Details + Buttons)
+rich_html = """
+<h1><tg-emoji emoji-id="6163613480936021313">🔒</tg-emoji> Hidely - Hide Photos</h1>
 
 <tg-slideshow>
-  <img src="https://telegram.org/example/photo.jpg"/>
-  <img src="https://telegram.org/example/photo.jpg"/>
-  <figcaption>Hidely Official Interface<cite>Feature Preview</cite></figcaption>
+  <img src="https://example.com/screen1.jpg"/>
+  <img src="https://example.com/screen2.jpg"/>
+  <figcaption>App Screenshots<cite>Version 2.0</cite></figcaption>
 </tg-slideshow>
 
-<aside><b>Hide Pictures & Videos with Decoy Modes and App Disguise.</b></aside>
-
-<p>Hidely is the ultimate privacy companion designed to keep your private media truly invisible.</p>
+<aside><b>Your ultimate privacy companion.</b></aside>
 
 <hr/>
 
-<h3><tg-emoji emoji-id="5222108309795908493">✨</tg-emoji> Core Capabilities</h3>
+<h3>Core Features</h3>
 <ul>
   <li><input type="checkbox" checked> <b>Private Vault</b></li>
   <li><input type="checkbox" checked> <b>App Disguise</b></li>
+  <li><input type="checkbox" checked> <b>Intruder Selfie</b></li>
 </ul>
 
-<hr/>
-
-<details>
-  <summary><b><tg-emoji emoji-id="5359441070201513074">🎭</tg-emoji> Deep Dive: Full Features</b></summary>
-  <br/>
-  
-  <b><tg-emoji emoji-id="5427009714741364024">💡</tg-emoji> Real-World Scenarios</b>
-  <table bordered striped>
-    <tr><th>The Threat</th><th>The Solution</th></tr>
-    <tr><td>Phone left unattended</td><td>Auto-lock activates instantly. <a href="#note-snoop">[1]</a></td></tr>
-  </table>
-  
-  <tg-reference name="note-snoop">Intruder selfies are securely captured.</tg-reference>
+<details open>
+  <summary><b>How it works</b></summary>
+  <p>Your files are stored <b>locally</b> with zero cloud exposure.</p>
+  <blockquote>We never see your data.<cite>Privacy Promise</cite></blockquote>
 </details>
 
 <hr/>
 
-<p><mark><tg-emoji emoji-id="5373130604147654226">▶️</tg-emoji> Available On Play Store</mark></p>
-<footer>Your privacy isn't just a feature; it is our architecture.</footer>
+<footer>Your privacy is our architecture.</footer>
 """
 
 Bot.sendRichMessage(
     chat_id=u,
+    rich_message={"html": rich_html}
+)
+```
+
+```python BLP Example (Markdown)
+md_content = """
+# Welcome to Rich Messages
+**Bold**, *italic*, ~~strikethrough~~, `code`, ==highlighted==, ||spoiler||
+
+| Feature | Supported |
+|:--------|:---------:|
+| Tables  | ✅ |
+| LaTeX   | ✅ |
+| Media   | ✅ |
+
+$$E = mc^2$$
+
+> This is a block quotation
+"""
+
+Bot.sendRichMessage(
+    chat_id=u,
+    rich_message={"markdown": md_content}
+)
+```
+
+---
+
+## sendRichMessageDraft
+
+Streams a **partial/in-progress** rich message to the user — useful for AI responses that appear progressively. The draft is ephemeral (disappears after ~30 seconds). After generation is complete, call `sendRichMessage` to persist the final message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer | Yes | Target private chat ID. |
+| `draft_id` | Integer | Yes | Non-zero integer identifying the draft. Changes with the same `draft_id` are animated. Different `draft_id` replaces without animation. |
+| `rich_message` | Object | Yes | The partial message as an `InputRichMessage` object. |
+| `can_stop` | Boolean | No | If `True`, shows the user a "Stop" button. |
+| `keep_on_stop` | Boolean | No | If `True`, keeps the draft visible when user presses Stop. |
+
+> **Note:** Direct file uploads are not supported in drafts. Use already-uploaded file IDs only.
+
+```python BLP Example (Streaming AI Response)
+import time
+
+# Step 1: Show thinking animation
+Bot.sendRichMessageDraft(
+    chat_id=u,
+    draft_id=1001,
     rich_message={
-        "html": rich_html_content
+        "html": "<tg-thinking>Thinking...</tg-thinking>"
+    },
+    can_stop=True
+)
+
+# Step 2: Stream partial content
+Bot.sendRichMessageDraft(
+    chat_id=u,
+    draft_id=1001,
+    rich_message={
+        "html": "<h2>Analysis</h2><p>Processing your request...</p>"
+    },
+    can_stop=True
+)
+
+# Step 3: Finalize with sendRichMessage
+Bot.sendRichMessage(
+    chat_id=u,
+    rich_message={
+        "html": "<h2>Analysis Complete</h2><p>Here are your results: <b>All checks passed!</b></p>"
     }
 )
 ```
@@ -104,111 +184,226 @@ Bot.sendRichMessage(
 
 ## Supported HTML Tags
 
-When using the `html` field in `rich_message`, you can use standard and custom Telegram tags:
+### Text Formatting
 
-### Basic Formatting
-- `<b>`, `<strong>`, `<i>`, `<em>`, `<u>`, `<ins>`, `<s>`, `<strike>`, `<del>`
-- `<code>`, `<mark>`, `<sub>`, `<sup>`
-- `<tg-spoiler>spoiler</tg-spoiler>`
+| Tag | Effect |
+|-----|--------|
+| `<b>`, `<strong>` | **Bold** |
+| `<i>`, `<em>` | *Italic* |
+| `<u>`, `<ins>` | Underline |
+| `<s>`, `<del>`, `<strike>` | ~~Strikethrough~~ |
+| `<code>` | `Inline code` |
+| `<mark>` | ==Highlighted== |
+| `<sub>` | Subscript |
+| `<sup>` | Superscript |
+| `<tg-spoiler>` | Spoiler (tap to reveal) |
+| `<tg-emoji emoji-id="...">` | Custom emoji |
+| `<tg-time unix="..." format="wDT">` | Formatted date/time |
+| `<tg-math>` | Inline LaTeX math |
 
-### Links and References
-- `<a href="https://t.me/">URL</a>`, `<a href="tg://user?id=123456789">Mention</a>`
-- `<a name="chapter-1"></a>` to create an anchor, `<a href="#chapter-1">Go to chapter</a>`
-- `<tg-reference name="note-1">Referenced text</tg-reference>` and link to it using `<a href="#note-1">`
+### Links & Anchors
 
-### Custom Emoji & Interactive Elements
-- `<tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>`
-- `<tg-time unix="1647531900" format="wDT">22:45 tomorrow</tg-time>`
-- `<tg-math>x^2 + y^2</tg-math>`
+```html
+<a href="https://t.me/">Regular URL</a>
+<a href="mailto:user@example.com">Email</a>
+<a href="tel:+123456789">Phone</a>
+<a href="tg://user?id=123456789">User mention</a>
+<a name="chapter-1"></a>           <!-- Create anchor -->
+<a href="#chapter-1">Jump to chapter 1</a>   <!-- Link to anchor -->
+<tg-reference name="note-1">Footnote text</tg-reference>
+<a href="#note-1">[1]</a>          <!-- Link to reference -->
+```
 
-### Structure & Layout
-- Headings: `<h1>` to `<h6>`
-- Paragraphs & Code: `<p>`, `<pre>`, `<footer>`, `<hr/>`
-- Lists: `<ul>`, `<ol>` (supports attributes like `start`, `type`, `reversed`)
-- Checkboxes: `<input type="checkbox" checked>`
-- Quotations: `<blockquote>`, `<blockquote expandable>`, `<aside>`
+### Structure
 
-### Media Elements
-- `<img src="https://telegram.org/photo.jpg"/>`
-- `<video src="...">`, `<audio src="...">`, `<tg-document src="...">`
-- Wrap media in `<figure>` to add a `<figcaption>` with `<cite>`.
-- Collages & Slideshows: `<tg-collage>`, `<tg-slideshow>`
+```html
+<h1>Heading 1</h1> ... <h6>Heading 6</h6>
+<p>Paragraph</p>
+<pre>Preformatted block</pre>
+<pre><code class="language-python">print("Hello")</code></pre>
+<footer>Footer text</footer>
+<hr/>
+<tg-math-block>E = mc^2</tg-math-block>
+```
 
-### Tables & Collapsible Blocks
-- Tables: `<table>`, `<tr>`, `<th>`, `<td>`. Supports `bordered`, `striped`, `compact` attributes on `<table>`, and `colspan`/`rowspan`/`align`/`valign` on cells.
-- Details: `<details open><summary>Title</summary>Content</details>`
+### Lists
+
+```html
+<!-- Unordered -->
+<ul>
+  <li>Item one</li>
+  <li>Item two</li>
+</ul>
+
+<!-- Ordered -->
+<ol start="1" type="1">
+  <li>First</li>
+  <li>Second</li>
+</ol>
+
+<!-- Checkboxes -->
+<ul>
+  <li><input type="checkbox" checked> Done</li>
+  <li><input type="checkbox"> Pending</li>
+</ul>
+```
+
+### Block Quotations
+
+```html
+<!-- Standard -->
+<blockquote>Quote text<cite>The Author</cite></blockquote>
+
+<!-- Expandable (collapsed by default) -->
+<blockquote expandable>Long quote...<cite>Source</cite></blockquote>
+
+<!-- Pull quote (centered) -->
+<aside>Pull quote text<cite>Author</cite></aside>
+```
+
+### Media
+
+```html
+<!-- Standalone media -->
+<img src="https://example.com/photo.jpg"/>
+<video src="https://example.com/video.mp4"></video>
+<audio src="https://example.com/audio.mp3"></audio>
+<tg-document src="https://example.com/file.pdf"></tg-document>
+
+<!-- With caption and spoiler -->
+<figure>
+  <img src="https://example.com/photo.jpg" tg-spoiler/>
+  <figcaption>Caption<cite>Credit</cite></figcaption>
+</figure>
+
+<!-- Map -->
+<tg-map lat="41.9" long="12.5" zoom="14"/>
+```
+
+### Collage & Slideshow
+
+```html
+<!-- Collage (grid layout) -->
+<tg-collage>
+  <img src="https://example.com/1.jpg"/>
+  <img src="https://example.com/2.jpg"/>
+  <figcaption>Caption</figcaption>
+</tg-collage>
+
+<!-- Slideshow (swipeable) -->
+<tg-slideshow>
+  <img src="https://example.com/1.jpg"/>
+  <video src="https://example.com/video.mp4"/>
+  <figcaption>Slideshow Caption<cite>Credit</cite></figcaption>
+</tg-slideshow>
+```
+
+### Tables
+
+```html
+<!-- Basic table -->
+<table>
+  <tr><th>Name</th><th>Score</th></tr>
+  <tr><td>Alice</td><td>95</td></tr>
+</table>
+
+<!-- Styled table (bordered + striped + compact) -->
+<table bordered striped compact>
+  <caption>Table Title</caption>
+  <tr>
+    <td colspan="2" align="left">Merged Cell</td>
+    <td align="right" valign="top">Right Top</td>
+  </tr>
+</table>
+```
+
+### Collapsible Details Block
+
+```html
+<!-- Collapsed by default -->
+<details>
+  <summary>Click to expand</summary>
+  <p>Hidden content here.</p>
+</details>
+
+<!-- Expanded by default -->
+<details open>
+  <summary><b>Always visible summary</b></summary>
+  <ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+  </ul>
+</details>
+```
 
 ### Interactive Buttons
-Buttons can be grouped in `<p>` or `<tg-button-row align="center">`:
+
+Buttons can appear **inline** inside text or in **row blocks**.
+
 ```html
+<!-- Inline buttons inside paragraph -->
+<p>Choose an action:
+  <tg-button type="url" style="success" url="https://bots.lt">Visit Site</tg-button>
+  <tg-button type="callback_data" style="link" data="btn_info">More Info</tg-button>
+  <tg-button type="web_app" style="danger" url="https://bots.lt">Open App</tg-button>
+  <tg-button type="copy_text" text="copied!">Copy Code</tg-button>
+  <tg-button type="disabled">Unavailable</tg-button>
+</p>
+
+<!-- Button rows with alignment -->
+<tg-button-row align="left">
+  <tg-button type="url" url="https://t.me">Telegram</tg-button>
+  <tg-button type="callback_data" data="info">Info</tg-button>
+</tg-button-row>
+
 <tg-button-row align="center">
-  <tg-button type="url" style="success" url="https://t.me">Link</tg-button>
-  <tg-button type="callback_data" style="link" data="callback">Callback</tg-button>
-  <tg-button type="web_app" style="danger" url="https://bots.lt">Mini App</tg-button>
+  <tg-button type="switch_inline_query" query="search">Search Inline</tg-button>
+</tg-button-row>
+
+<tg-button-row align="right">
+  <tg-button type="login_url" url="https://t.me" forward-text="Login" request-write-access>Login</tg-button>
 </tg-button-row>
 ```
+
+**Button types:**
+
+| `type` | Description |
+|--------|-------------|
+| `url` | Opens a URL |
+| `callback_data` | Sends callback to bot |
+| `web_app` | Opens a Mini App |
+| `login_url` | Telegram Login Widget |
+| `switch_inline_query` | Opens inline mode in another chat |
+| `switch_inline_query_current_chat` | Opens inline mode in current chat |
+| `switch_inline_query_chosen_chat` | Opens inline mode with chat filter |
+| `copy_text` | Copies specified text to clipboard |
+| `disabled` | Shows a non-interactive button |
+
+**Button styles:** `success` (green), `danger` (red), `primary` (blue), `link` (borderless link).
 
 ---
 
 ## Supported Markdown Syntax
 
-To use Markdown instead, pass the `markdown` field in `rich_message`.
-
-- **Bold**: `**text**` or `__text__`
-- **Italic**: `*text*` or `_text_`
-- **Strikethrough**: `~~text~~`
-- **Code**: `` `inline code` `` or ``` ```python code ``` ```
-- **Marked**: `==text==`
-- **Spoiler**: `||text||`
-- **Links**: `[text](URL)`
-- **Mentions**: `[user](tg://user?id=1234)`
-- **Math**: `$x^2$` or `$$E=mc^2$$` or ``` ```math E=mc^2 ``` ```
-- **Tables**: Standard Markdown tables
-- **Footnotes**: `Text[^1]` and `[^1]: Definition`
-- **Media**: `![](URL "Caption")`
-- **Collage**: `<tg-collage> ... </tg-collage>`
-- **Slideshow**: `<tg-slideshow> ... </tg-slideshow>`
-- **Details**: `<details><summary>...</summary>...</details>`
-
-```python BLP Example
-markdown_content = """
-# Welcome to Rich Messages
-This is a **Markdown** formatted message!
-
-<tg-slideshow>
-![](https://telegram.org/example/photo.jpg)
-![](https://telegram.org/example/video.mp4)
-</tg-slideshow>
-
-| Metric | Value |
-|:-------|------:|
-| Speed  | **42** <sup>ms</sup> |
-"""
-
-Bot.sendRichMessage(
-    chat_id=u,
-    rich_message={
-        "markdown": markdown_content
-    }
-)
-```
-
----
-
-## sendRichMessageDraft
-
-Use this method to stream a **partial rich message** to a user while the message is being generated (like a streaming AI response). The draft is ephemeral and acts as a 30-second preview. You must call `sendRichMessage` when generation finishes to persist it.
-
-```python BLP Example
-draft_html = "<h1>AI is thinking...</h1><tg-thinking>Thinking...</tg-thinking>"
-
-Bot.sendRichMessageDraft(
-    chat_id=u,
-    draft_id=12345,
-    rich_message={"html": draft_html},
-    can_stop=True,
-    keep_on_stop=False
-)
-```
-
-*(Note: `<tg-thinking>Thinking...</tg-thinking>` shows a native Telegram thinking animation).*
+| Syntax | Effect |
+|--------|--------|
+| `**bold**` or `__bold__` | Bold |
+| `*italic*` or `_italic_` | Italic |
+| `~~strikethrough~~` | Strikethrough |
+| `` `code` `` | Inline code |
+| `==marked==` | Highlighted |
+| `\|\|spoiler\|\|` | Spoiler |
+| `[text](URL)` | Link |
+| `[user](tg://user?id=...)` | User mention |
+| `![👍](tg://emoji?id=...)` | Custom emoji |
+| `$x^2$` or `$$E=mc^2$$` | Inline/block math |
+| ` ```python ``` ` | Code block |
+| `# H1` to `###### H6` | Headings |
+| `---` | Divider |
+| `- item`, `* item`, `+ item` | Unordered list |
+| `1. item` | Ordered list |
+| `- [ ] task`, `- [x] done` | Task list |
+| `> quote` | Block quotation |
+| `![](URL "Caption")` | Media with caption |
+| `\| col \| col \|` | Table |
+| `[^id]: text` | Footnote |

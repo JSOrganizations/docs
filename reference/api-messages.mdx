@@ -3,25 +3,54 @@ title: 'Messages & Content'
 description: 'Send text, locations, contacts, polls, and interactive content.'
 ---
 
-This section covers all text and non-media interactive message types available in the Telegram Bot API.
+This section covers all text and non-media interactive message types available via the `Bot` object.
 
-## Sending Text Messages
+---
 
-### sendMessage
-Use this method to send text messages.
+## sendMessage
+
+Sends a text message to a chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID or `@username`. Use `u` for the current user. |
+| `text` | String | Yes | The message text. Up to 4096 characters. |
+| `parse_mode` | String | No | Formatting mode: `"HTML"`, `"Markdown"`, or `"MarkdownV2"`. |
+| `disable_web_page_preview` | Boolean | No | If `True`, disables link previews in the message. |
+| `disable_notification` | Boolean | No | Sends the message silently. |
+| `reply_to_message_id` | Integer | No | If set, the message will be sent as a reply. |
+| `reply_markup` | Object | No | Inline or reply keyboard markup (see Keyboards). |
 
 ```python BLP Example
+# Basic message
+Bot.sendMessage(chat_id=u, text="Hello World!")
+
+# Short form (uses current chat automatically)
+Bot.sendMessage("Hello World!")
+
+# With formatting and reply
 Bot.sendMessage(
-    chat_id=u, 
-    text="Hello World!\nThis is a **bold** and __italic__ text.",
-    parse_mode="MarkdownV2",
+    chat_id=u,
+    text="<b>Bold</b> and <i>italic</i> text!",
+    parse_mode="HTML",
     disable_web_page_preview=True,
     reply_to_message_id=message.message_id
 )
 ```
 
-### copyMessage
-Use this method to copy messages of any kind. The method is analogous to the method `forwardMessage`, but the copied message doesn't have a link to the original sender.
+---
+
+## copyMessage
+
+Copies any message. Unlike `forwardMessage`, the copy has no link to the original message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID where the copy will be sent. |
+| `from_chat_id` | Integer or String | Yes | Source chat ID where the original message is. |
+| `message_id` | Integer | Yes | Message ID in the source chat. |
+| `caption` | String | No | New caption to add to the copied message. |
+| `parse_mode` | String | No | Formatting mode for the caption. |
 
 ```python BLP Example
 Bot.copyMessage(
@@ -32,8 +61,18 @@ Bot.copyMessage(
 )
 ```
 
-### forwardMessage
-Use this method to forward messages of any kind.
+---
+
+## forwardMessage
+
+Forwards a message from one chat to another. Shows the original sender.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `from_chat_id` | Integer or String | Yes | Source chat ID. |
+| `message_id` | Integer | Yes | Message ID to forward. |
+| `disable_notification` | Boolean | No | Sends message silently. |
 
 ```python BLP Example
 Bot.forwardMessage(
@@ -45,21 +84,49 @@ Bot.forwardMessage(
 
 ---
 
-## Interactive Content
+## sendLocation
 
-### sendLocation
-Use this method to send point on the map.
+Sends a point on a map.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `latitude` | Float | Yes | Latitude of the location. |
+| `longitude` | Float | Yes | Longitude of the location. |
+| `live_period` | Integer | No | Period in seconds for a live location (60–86400). |
+| `heading` | Integer | No | Direction of movement in degrees (1–360). |
+| `proximity_alert_radius` | Integer | No | Alert radius for nearby users in meters (1–100000). |
 
 ```python BLP Example
+# Static location
 Bot.sendLocation(
     chat_id=u,
     latitude=23.8103,
     longitude=90.4125
 )
+
+# Live location (updates for 60 seconds)
+Bot.sendLocation(
+    chat_id=u,
+    latitude=23.8103,
+    longitude=90.4125,
+    live_period=60
+)
 ```
 
-### editMessageLiveLocation
-Use this method to edit live location messages. A location can be edited until its `live_period` expires or editing is explicitly disabled by a call to `stopMessageLiveLocation`.
+---
+
+## editMessageLiveLocation
+
+Edits a live location message while it is still active.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the live location message. |
+| `latitude` | Float | Yes | New latitude. |
+| `longitude` | Float | Yes | New longitude. |
+| `heading` | Integer | No | New direction in degrees (1–360). |
 
 ```python BLP Example
 Bot.editMessageLiveLocation(
@@ -70,8 +137,16 @@ Bot.editMessageLiveLocation(
 )
 ```
 
-### stopMessageLiveLocation
-Use this method to stop updating a live location message before `live_period` expires.
+---
+
+## stopMessageLiveLocation
+
+Stops updating a live location before its `live_period` expires.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the live location message. |
 
 ```python BLP Example
 Bot.stopMessageLiveLocation(
@@ -80,8 +155,20 @@ Bot.stopMessageLiveLocation(
 )
 ```
 
-### sendVenue
-Use this method to send information about a venue.
+---
+
+## sendVenue
+
+Sends information about a venue (location with a name and address).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `latitude` | Float | Yes | Latitude of the venue. |
+| `longitude` | Float | Yes | Longitude of the venue. |
+| `title` | String | Yes | Name of the venue. |
+| `address` | String | Yes | Address of the venue. |
+| `foursquare_id` | String | No | Foursquare ID of the venue. |
 
 ```python BLP Example
 Bot.sendVenue(
@@ -93,8 +180,19 @@ Bot.sendVenue(
 )
 ```
 
-### sendContact
-Use this method to send phone contacts.
+---
+
+## sendContact
+
+Sends a phone contact.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `phone_number` | String | Yes | Contact's phone number. |
+| `first_name` | String | Yes | Contact's first name. |
+| `last_name` | String | No | Contact's last name. |
+| `vcard` | String | No | Additional vCard data. |
 
 ```python BLP Example
 Bot.sendContact(
@@ -105,10 +203,26 @@ Bot.sendContact(
 )
 ```
 
-### sendPoll
-Use this method to send a native poll.
+---
+
+## sendPoll
+
+Sends a native Telegram poll.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `question` | String | Yes | Poll question (1–300 characters). |
+| `options` | Array of String | Yes | List of answer options (2–10 items). |
+| `is_anonymous` | Boolean | No | If `False`, poll results are visible to all. Default: `True`. |
+| `type` | String | No | `"regular"` or `"quiz"`. Default: `"regular"`. |
+| `allows_multiple_answers` | Boolean | No | Allow multiple choice. Only for regular polls. |
+| `correct_option_id` | Integer | No | Index of the correct answer. Required for quiz polls. |
+| `explanation` | String | No | Explanation shown after a quiz answer. |
+| `open_period` | Integer | No | Poll open time in seconds (5–600). |
 
 ```python BLP Example
+# Regular poll
 Bot.sendPoll(
     chat_id=u,
     question="What is your favorite programming language?",
@@ -116,45 +230,95 @@ Bot.sendPoll(
     is_anonymous=False,
     allows_multiple_answers=True
 )
-```
 
-### sendDice
-Use this method to send an animated emoji that will display a random value.
-
-```python BLP Example
-Bot.sendDice(
+# Quiz poll
+Bot.sendPoll(
     chat_id=u,
-    emoji="🎰" # can be 🎲, 🎯, 🏀, ⚽, 🎳, or 🎰
-)
-```
-
-### sendChatAction
-Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less.
-
-```python BLP Example
-Bot.sendChatAction(
-    chat_id=u,
-    action="typing" # e.g., typing, upload_photo, record_video, upload_document
+    question="What is 2 + 2?",
+    options=["3", "4", "5"],
+    type="quiz",
+    correct_option_id=1,
+    explanation="2 + 2 = 4!"
 )
 ```
 
 ---
 
-## Editing & Deleting Messages
+## sendDice
 
-### editMessageText
-Use this method to edit text and game messages.
+Sends an animated emoji that shows a random value.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `emoji` | String | No | Emoji to animate. One of: `🎲`, `🎯`, `🏀`, `⚽`, `🎳`, `🎰`. Default: `🎲`. |
+
+```python BLP Example
+Bot.sendDice(chat_id=u, emoji="🎰")
+Bot.sendDice(chat_id=u, emoji="🎯")
+```
+
+---
+
+## sendChatAction
+
+Shows the user that the bot is doing something. Status lasts 5 seconds or until the bot sends a message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `action` | String | Yes | Type of action. See options below. |
+
+**Available actions:**
+
+| Action | Description |
+|--------|-------------|
+| `typing` | Bot is typing a text message |
+| `upload_photo` | Bot is uploading a photo |
+| `record_video` | Bot is recording a video |
+| `upload_video` | Bot is uploading a video |
+| `record_voice` | Bot is recording voice |
+| `upload_voice` | Bot is uploading voice |
+| `upload_document` | Bot is uploading a file |
+| `find_location` | Bot is finding a location |
+
+```python BLP Example
+Bot.sendChatAction(chat_id=u, action="typing")
+```
+
+---
+
+## editMessageText
+
+Edits the text of an existing message sent by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Chat ID of the message to edit. |
+| `message_id` | Integer | Yes | ID of the message to edit. |
+| `text` | String | Yes | New text content. |
+| `parse_mode` | String | No | Formatting mode: `"HTML"`, `"Markdown"`, `"MarkdownV2"`. |
+| `reply_markup` | Object | No | New inline keyboard to attach. |
 
 ```python BLP Example
 Bot.editMessageText(
     chat_id=u,
     message_id=message.message_id,
-    text="This text has been updated!"
+    text="<b>Updated text!</b>",
+    parse_mode="HTML"
 )
 ```
 
-### deleteMessage
-Use this method to delete a message, including service messages.
+---
+
+## deleteMessage
+
+Deletes a message. Bots can only delete their own messages or messages in groups where they are admin.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Chat ID. |
+| `message_id` | Integer | Yes | ID of the message to delete. |
 
 ```python BLP Example
 Bot.deleteMessage(

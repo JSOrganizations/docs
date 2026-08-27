@@ -1,25 +1,55 @@
 ---
 title: 'Chats & Members'
-description: 'Manage groups, channels, members, and chat permissions.'
+description: 'Manage groups, channels, members, permissions, and chat information.'
 ---
 
-This section covers administrative and management methods for Chats and Members in the Telegram Bot API.
+This section covers all administrative and management methods for chats and members in the Telegram Bot API.
+
+> **Note:** Most methods here require your bot to be an **administrator** in the target group or channel.
+
+---
 
 ## Member Management
 
 ### banChatMember
-Use this method to ban a user in a group, a supergroup or a channel.
+
+Bans a user from a group, supergroup, or channel. The user can rejoin via invite link unless `revoke_messages` is used.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `user_id` | Integer | Yes | Telegram user ID to ban. |
+| `until_date` | Integer | No | UNIX timestamp until when the user is banned. 0 or not set = permanent ban. |
+| `revoke_messages` | Boolean | No | If `True`, deletes all messages sent by this user. |
 
 ```python BLP Example
+# Ban the user who sent a reply (permanent)
 Bot.banChatMember(
     chat_id=message.chat.id,
     user_id=message.reply_to_message.from.id,
     revoke_messages=True
 )
+
+# Temporary ban for 1 hour
+import time
+Bot.banChatMember(
+    chat_id=message.chat.id,
+    user_id=message.reply_to_message.from.id,
+    until_date=int(time.time()) + 3600
+)
 ```
 
+---
+
 ### unbanChatMember
-Use this method to unban a previously banned user in a supergroup or channel.
+
+Unbans a previously banned user.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `user_id` | Integer | Yes | Telegram user ID to unban. |
+| `only_if_banned` | Boolean | No | If `True`, only unbans if the user was previously banned (prevents errors). |
 
 ```python BLP Example
 Bot.unbanChatMember(
@@ -29,13 +59,39 @@ Bot.unbanChatMember(
 )
 ```
 
+---
+
 ### restrictChatMember
-Use this method to restrict a user in a supergroup.
+
+Restricts what a user can do in a supergroup.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target supergroup ID. |
+| `user_id` | Integer | Yes | User ID to restrict. |
+| `permissions` | JSON String | Yes | A JSON-encoded `ChatPermissions` object. |
+| `until_date` | Integer | No | UNIX timestamp when restriction is lifted. |
+
+**`ChatPermissions` fields (all Boolean):**
+
+| Field | Description |
+|-------|-------------|
+| `can_send_messages` | Send text messages |
+| `can_send_media_messages` | Send photos/videos/audio/documents |
+| `can_send_polls` | Send polls |
+| `can_send_other_messages` | Send stickers, GIFs, games |
+| `can_add_web_page_previews` | Add web page previews |
+| `can_change_info` | Change group info (admins only) |
+| `can_invite_users` | Invite other users |
+| `can_pin_messages` | Pin messages (admins only) |
 
 ```python BLP Example
+# Mute a user (restrict all message types)
 permissions = {
     "can_send_messages": False,
-    "can_send_media_messages": False
+    "can_send_media_messages": False,
+    "can_send_polls": False,
+    "can_send_other_messages": False
 }
 
 Bot.restrictChatMember(
@@ -45,35 +101,80 @@ Bot.restrictChatMember(
 )
 ```
 
+---
+
 ### promoteChatMember
-Use this method to promote or demote a user in a supergroup or a channel.
+
+Promotes or demotes a user as administrator in a supergroup or channel.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `user_id` | Integer | Yes | User ID to promote. |
+| `is_anonymous` | Boolean | No | If `True`, admin messages appear as group name. |
+| `can_manage_chat` | Boolean | No | Allows managing the chat. |
+| `can_change_info` | Boolean | No | Allows changing group info. |
+| `can_delete_messages` | Boolean | No | Allows deleting any message. |
+| `can_invite_users` | Boolean | No | Allows inviting users. |
+| `can_restrict_members` | Boolean | No | Allows banning/restricting users. |
+| `can_pin_messages` | Boolean | No | Allows pinning messages. |
+| `can_manage_topics` | Boolean | No | Allows managing forum topics. |
+| `can_post_stories` | Boolean | No | Allows posting stories. |
+| `can_edit_stories` | Boolean | No | Allows editing stories. |
+| `can_delete_stories` | Boolean | No | Allows deleting stories. |
+| `can_send_welcome_messages` | Boolean | No | Allows sending welcome messages. |
 
 ```python BLP Example
+# Promote to full admin
 Bot.promoteChatMember(
     chat_id=message.chat.id,
     user_id=message.reply_to_message.from.id,
+    can_manage_chat=True,
     can_change_info=True,
     can_delete_messages=True,
     can_invite_users=True,
     can_restrict_members=True,
-    can_pin_messages=True,
-    can_manage_topics=True
+    can_pin_messages=True
+)
+
+# Demote back to regular member (pass False for all)
+Bot.promoteChatMember(
+    chat_id=message.chat.id,
+    user_id=message.reply_to_message.from.id,
+    can_manage_chat=False
 )
 ```
 
+---
+
 ### setChatAdministratorCustomTitle
-Use this method to set a custom title for an administrator in a supergroup promoted by the bot.
+
+Sets a custom title (badge) for an admin promoted by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target supergroup ID. |
+| `user_id` | Integer | Yes | Admin user ID. |
+| `custom_title` | String | Yes | Admin title, up to 16 characters. |
 
 ```python BLP Example
 Bot.setChatAdministratorCustomTitle(
     chat_id=message.chat.id,
     user_id=message.reply_to_message.from.id,
-    custom_title="Bot Commander"
+    custom_title="Community Leader"
 )
 ```
 
+---
+
 ### banChatSenderChat
-Use this method to ban a channel chat in a supergroup or a channel. Until the chat is unbanned, the owner of the banned chat won't be able to send messages on behalf of any of their channels.
+
+Bans a channel from posting in a supergroup or channel.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `sender_chat_id` | Integer | Yes | ID of the channel to ban. |
 
 ```python BLP Example
 Bot.banChatSenderChat(
@@ -82,8 +183,16 @@ Bot.banChatSenderChat(
 )
 ```
 
+---
+
 ### unbanChatSenderChat
-Use this method to unban a previously banned channel chat in a supergroup or channel.
+
+Unbans a previously banned channel.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `sender_chat_id` | Integer | Yes | ID of the channel to unban. |
 
 ```python BLP Example
 Bot.unbanChatSenderChat(
@@ -97,11 +206,18 @@ Bot.unbanChatSenderChat(
 ## Chat Management
 
 ### setChatPermissions
-Use this method to set default chat permissions for all members.
+
+Sets the default permissions for all non-admin members.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target supergroup ID. |
+| `permissions` | JSON String | Yes | JSON-encoded `ChatPermissions` object. |
 
 ```python BLP Example
+# Lock down the group (read-only mode)
 permissions = {
-    "can_send_messages": True,
+    "can_send_messages": False,
     "can_send_media_messages": False,
     "can_send_polls": False,
     "can_send_other_messages": False,
@@ -114,40 +230,78 @@ Bot.setChatPermissions(
 )
 ```
 
+---
+
 ### exportChatInviteLink
-Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked.
+
+Generates a new primary invite link, revoking the previous one.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
 
 ```python BLP Example
 result = Bot.exportChatInviteLink(chat_id=message.chat.id)
-Bot.sendMessage(u, f"New Invite Link: {result.result}")
+Bot.sendMessage(chat_id=u, text=f"New Invite Link: {result.result}")
 ```
 
+---
+
 ### createChatInviteLink
-Use this method to create an additional invite link for a chat.
+
+Creates a custom invite link with optional expiry and member limits.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `name` | String | No | Link label (up to 32 characters). |
+| `expire_date` | Integer | No | UNIX timestamp for link expiry. |
+| `member_limit` | Integer | No | Maximum users who can join (1–99999). |
+| `creates_join_request` | Boolean | No | If `True`, users must be approved by admin. |
 
 ```python BLP Example
 Bot.createChatInviteLink(
     chat_id=message.chat.id,
     name="VIP Access",
-    member_limit=10,
-    creates_join_request=False
+    member_limit=50,
+    creates_join_request=True
 )
 ```
 
+---
+
 ### editChatInviteLink
-Use this method to edit a non-primary invite link created by the bot.
+
+Edits a non-primary invite link created by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `invite_link` | String | Yes | The invite link to edit. |
+| `name` | String | No | New label. |
+| `expire_date` | Integer | No | New expiry UNIX timestamp. |
+| `member_limit` | Integer | No | New member limit. |
+| `creates_join_request` | Boolean | No | Toggle join request mode. |
 
 ```python BLP Example
 Bot.editChatInviteLink(
     chat_id=message.chat.id,
     invite_link="https://t.me/joinchat/XXXX",
-    name="Expired Link",
-    member_limit=1
+    name="Updated VIP Link",
+    member_limit=100
 )
 ```
 
+---
+
 ### revokeChatInviteLink
-Use this method to revoke an invite link created by the bot.
+
+Revokes an invite link. Users who already joined via this link stay in the chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `invite_link` | String | Yes | The invite link to revoke. |
 
 ```python BLP Example
 Bot.revokeChatInviteLink(
@@ -156,8 +310,16 @@ Bot.revokeChatInviteLink(
 )
 ```
 
+---
+
 ### approveChatJoinRequest
-Use this method to approve a chat join request.
+
+Approves a pending join request.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `user_id` | Integer | Yes | User ID to approve. |
 
 ```python BLP Example
 Bot.approveChatJoinRequest(
@@ -166,8 +328,16 @@ Bot.approveChatJoinRequest(
 )
 ```
 
+---
+
 ### declineChatJoinRequest
-Use this method to decline a chat join request.
+
+Declines a pending join request.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `user_id` | Integer | Yes | User ID to decline. |
 
 ```python BLP Example
 Bot.declineChatJoinRequest(
@@ -176,46 +346,85 @@ Bot.declineChatJoinRequest(
 )
 ```
 
+---
+
 ### setChatPhoto
-Use this method to set a new profile photo for the chat.
+
+Sets a new profile photo for the chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `photo` | String | Yes | File ID or URL of the new photo. |
 
 ```python BLP Example
-# Assuming you have a photo file ID
 Bot.setChatPhoto(
     chat_id=message.chat.id,
     photo="AgACAgIAAxkBAAMrZN..."
 )
 ```
 
+---
+
 ### deleteChatPhoto
-Use this method to delete a chat photo.
+
+Deletes the chat's current profile photo.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
 
 ```python BLP Example
 Bot.deleteChatPhoto(chat_id=message.chat.id)
 ```
 
+---
+
 ### setChatTitle
-Use this method to change the title of a chat.
+
+Changes the title of a group or channel.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `title` | String | Yes | New chat title (1–255 characters). |
 
 ```python BLP Example
 Bot.setChatTitle(
     chat_id=message.chat.id,
-    title="My Awesome Group"
+    title="My Awesome Community"
 )
 ```
 
+---
+
 ### setChatDescription
-Use this method to change the description of a group, a supergroup or a channel.
+
+Changes the description of a group, supergroup, or channel.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `description` | String | No | New description (up to 255 characters). Pass empty string to clear. |
 
 ```python BLP Example
 Bot.setChatDescription(
     chat_id=message.chat.id,
-    description="Welcome to the best group on Telegram!"
+    description="The best community on Telegram!"
 )
 ```
 
+---
+
 ### pinChatMessage
-Use this method to add a message to the list of pinned messages in a chat.
+
+Pins a message in the chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the message to pin. |
+| `disable_notification` | Boolean | No | If `True`, does not send a notification. |
 
 ```python BLP Example
 Bot.pinChatMessage(
@@ -225,8 +434,16 @@ Bot.pinChatMessage(
 )
 ```
 
+---
+
 ### unpinChatMessage
-Use this method to remove a message from the list of pinned messages in a chat.
+
+Unpins a specific pinned message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | No | ID of the message to unpin. If omitted, unpins the most recent pin. |
 
 ```python BLP Example
 Bot.unpinChatMessage(
@@ -235,15 +452,29 @@ Bot.unpinChatMessage(
 )
 ```
 
+---
+
 ### unpinAllChatMessages
-Use this method to clear the list of pinned messages in a chat.
+
+Clears all pinned messages in the chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
 
 ```python BLP Example
 Bot.unpinAllChatMessages(chat_id=message.chat.id)
 ```
 
+---
+
 ### leaveChat
-Use this method for your bot to leave a group, supergroup or channel.
+
+Makes the bot leave a group, supergroup, or channel.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID to leave. |
 
 ```python BLP Example
 Bot.leaveChat(chat_id=message.chat.id)
@@ -251,38 +482,84 @@ Bot.leaveChat(chat_id=message.chat.id)
 
 ---
 
-## Chat Information Retrievals
+## Chat Information
 
 ### getChat
-Use this method to get up to date information about the chat.
+
+Gets full up-to-date information about a chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID or `@username`. |
+
+**Returns:** A `Chat` object with fields like `id`, `type`, `title`, `username`, `description`, `invite_link`, `member_count`, etc.
 
 ```python BLP Example
 result = Bot.getChat(chat_id=message.chat.id)
-# Extract info from result.result
+chat = result.result
+Bot.sendMessage(
+    chat_id=u,
+    text=f"Chat: {chat.title}\nType: {chat.type}\nMembers: {chat.member_count}"
+)
 ```
 
+---
+
 ### getChatAdministrators
-Use this method to get a list of administrators in a chat.
+
+Gets the list of all admins in a chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
 
 ```python BLP Example
 result = Bot.getChatAdministrators(chat_id=message.chat.id)
+admins = result.result
+for admin in admins:
+    Bot.sendMessage(chat_id=u, text=f"Admin: {admin.user.first_name}")
 ```
 
+---
+
 ### getChatMemberCount
-Use this method to get the number of members in a chat.
+
+Gets the total number of members in a chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
 
 ```python BLP Example
 result = Bot.getChatMemberCount(chat_id=message.chat.id)
-Bot.sendMessage(u, f"Total members: {result.result}")
+Bot.sendMessage(chat_id=u, text=f"Total members: {result.result}")
 ```
 
+---
+
 ### getChatMember
-Use this method to get information about a member of a chat.
+
+Gets information about a specific member of a chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `user_id` | Integer | Yes | Telegram user ID. |
+
+**Returns:** A `ChatMember` object. The `status` field can be: `creator`, `administrator`, `member`, `restricted`, `left`, or `kicked`.
 
 ```python BLP Example
 result = Bot.getChatMember(
     chat_id=message.chat.id,
     user_id=u
 )
-Bot.sendMessage(u, f"User status: {result.result.status}")
+member = result.result
+Bot.sendMessage(
+    chat_id=u,
+    text=f"Status: {member.status}"
+)
+
+# Check if user is admin
+if member.status in ["administrator", "creator"]:
+    Bot.sendMessage(chat_id=u, text="You are an admin!")
 ```

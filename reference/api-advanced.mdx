@@ -1,16 +1,28 @@
 ---
 title: 'Advanced Methods'
-description: 'Inline queries, Webhooks, and Bot Configurations.'
+description: 'Inline queries, bot configuration, bot management, and internal BLP engine methods.'
 ---
 
-This section covers advanced interaction methods and configuration options.
+---
 
 ## Inline Mode
 
-Inline mode allows users to interact with your bot from any chat by typing `@your_bot_username` followed by a query.
+Inline mode lets users interact with your bot from **any chat** by typing `@your_bot_name` followed by a query. Your bot receives an `inline_query` update and must respond with results.
 
 ### answerInlineQuery
-Use this method to send answers to an inline query. No more than **50** results per query are allowed.
+
+Sends answer results back to an inline query. Must be called within 10 seconds of receiving the query.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `inline_query_id` | String | Yes | Unique ID of the inline query. Use `raw_message.get("id")`. |
+| `results` | JSON String | Yes | JSON-encoded array of `InlineQueryResult` objects (max 50). |
+| `cache_time` | Integer | No | Max seconds the result is cached on the client. Default: `300`. |
+| `is_personal` | Boolean | No | If `True`, results are only cached for the requesting user. |
+| `next_offset` | String | No | Offset for pagination of results. |
+| `button` | Object | No | A button shown above the results (e.g., Switch to PM). |
+
+**Result types:** `article`, `photo`, `gif`, `mpeg4_gif`, `video`, `audio`, `voice`, `document`, `location`, `venue`, `contact`, `game`, and cached variants.
 
 ```python BLP Example
 results = [
@@ -18,8 +30,17 @@ results = [
         "type": "article",
         "id": "1",
         "title": "Welcome to Bots.LT",
+        "description": "Click to send a message",
         "input_message_content": {
-            "message_text": "Bots.LT is the best platform for Bot creation!"
+            "message_text": "Hello from Bots.LT! 🚀"
+        }
+    },
+    {
+        "type": "article",
+        "id": "2",
+        "title": "Another Result",
+        "input_message_content": {
+            "message_text": "This is result #2"
         }
     }
 ]
@@ -27,44 +48,128 @@ results = [
 Bot.answerInlineQuery(
     inline_query_id=raw_message.get("id"),
     results=jsondumps(results),
-    cache_time=300
+    cache_time=300,
+    is_personal=True
 )
 ```
+
+---
 
 ## Bot Configuration
 
 ### setMyCommands
-Use this method to change the list of the bot's commands. These commands appear in the Telegram menu button.
+
+Registers the bot's command list, visible in the Telegram `/` menu.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `commands` | JSON String | Yes | JSON-encoded array of `{command, description}` objects. Up to 100 commands. |
+| `scope` | Object | No | Scope of commands (e.g., all users, specific chat, or chat admin). |
+| `language_code` | String | No | Two-letter IETF language code (e.g., `"en"`, `"bn"`). |
 
 ```python BLP Example
 commands = [
     {"command": "start", "description": "Start the bot"},
     {"command": "help", "description": "Get help"},
-    {"command": "settings", "description": "Configure settings"}
+    {"command": "profile", "description": "View your profile"},
+    {"command": "settings", "description": "Configure your settings"}
 ]
 
 Bot.setMyCommands(commands=jsondumps(commands))
 ```
 
+---
+
 ### deleteMyCommands
-Use this method to delete the list of the bot's commands for the given scope and user language.
+
+Deletes the bot's command list. After this, Telegram shows no menu commands.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `scope` | Object | No | Scope to delete commands from. |
+| `language_code` | String | No | Language code. |
 
 ```python BLP Example
+# Remove all commands globally
 Bot.deleteMyCommands()
 ```
 
+---
+
 ### getMyCommands
-Use this method to get the current list of the bot's commands.
+
+Gets the current list of registered commands.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `scope` | Object | No | Scope to get commands for. |
+| `language_code` | String | No | Language code. |
 
 ```python BLP Example
 result = Bot.getMyCommands()
-Bot.sendMessage(u, f"Current commands: {result.result}")
+commands = result.result
+for cmd in commands:
+    Bot.sendMessage(chat_id=u, text=f"/{cmd.command} — {cmd.description}")
 ```
 
-### setChatMenuButton
-Use this method to change the bot's menu button in a private chat, or the default menu button.
+---
+
+### setMyName
+
+Sets the bot's display name.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | No | New name (1–64 characters). Pass empty to reset. |
+| `language_code` | String | No | Language-specific name. |
 
 ```python BLP Example
+Bot.setMyName(name="My Awesome Bot")
+```
+
+---
+
+### setMyDescription
+
+Sets the bot's "What can this bot do?" description shown on the start page.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `description` | String | No | New description (up to 512 characters). |
+| `language_code` | String | No | Language-specific description. |
+
+```python BLP Example
+Bot.setMyDescription(description="I help you manage your tasks and reminders effortlessly!")
+```
+
+---
+
+### setMyShortDescription
+
+Sets the short description shown in the bot's profile.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `short_description` | String | No | New short description (up to 120 characters). |
+| `language_code` | String | No | Language-specific short description. |
+
+```python BLP Example
+Bot.setMyShortDescription(short_description="Your personal task manager bot.")
+```
+
+---
+
+### setChatMenuButton
+
+Sets the menu button shown in private chats with the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer | No | Specific private chat. If omitted, sets default for all chats. |
+| `menu_button` | JSON String | Yes | JSON object. Types: `default`, `commands`, or `web_app`. |
+
+```python BLP Example
+# Open a Web App from the menu button
 menu_button = {
     "type": "web_app",
     "text": "Open App",
@@ -75,53 +180,241 @@ Bot.setChatMenuButton(
     chat_id=u,
     menu_button=jsondumps(menu_button)
 )
+
+# Reset to default commands button
+Bot.setChatMenuButton(
+    chat_id=u,
+    menu_button=jsondumps({"type": "commands"})
+)
 ```
-### Bot.Transfer
-Use this method to programmatically transfer the ownership of the bot to another user via their registered email or username on the Bots.LT platform. By default, it transfers the current bot, but you can also transfer another bot you own by passing `bot_id`.
+
+---
+
+### getMe
+
+Returns basic information about the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| *(none)* | — | — | No parameters required. |
+
+**Returns** fields like `id`, `is_bot`, `first_name`, `username`, `can_join_groups`, `can_read_all_group_messages`, `supports_inline_queries`.
 
 ```python BLP Example
-# Transfer current bot using username
+result = Bot.getMe()
+me = result.result
+Bot.sendMessage(chat_id=u, text=f"Bot: @{me.username} (ID: {me.id})")
+```
+
+---
+
+## Bot Management (BLP Platform)
+
+These are **Bots.LT-specific** methods, not part of the standard Telegram API.
+
+### Bot.info
+
+Returns detailed information about the current bot from the Bots.LT platform.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `bot_id` | String | No | Bot ID to query. Defaults to current bot. |
+
+**Returns** a `DotDict` with fields: `token`, `bot_id`, `owner_email`, `status`, `username`, `first_name`, `userstat` (total users).
+
+```python BLP Example
+info = Bot.info()
+Bot.sendMessage(
+    chat_id=u,
+    text=f"Bot: {info.first_name}\nStatus: {info.status}\nTotal users: {info.userstat}"
+)
+
+# Or access via dynamic properties
+Bot.sendMessage(chat_id=u, text=f"My username: @{Bot.username}")
+Bot.sendMessage(chat_id=u, text=f"Owner: {Bot.owner_email}")
+```
+
+---
+
+### Bot.Transfer
+
+Programmatically transfers ownership of the bot to another Bots.LT user via their registered email or username.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `email` | String | No* | Registered email of the new owner. |
+| `username` | String | No* | Bots.LT username of the new owner. |
+| `bot_id` | String | No | Bot to transfer. Defaults to current bot. Can also transfer another bot you own. |
+
+> **\*** Either `email` or `username` is required.
+
+**Returns** `{"ok": True, "bot_id": "new_bot_id"}` on success.
+
+```python BLP Example
+# Transfer current bot by username
 Bot.Transfer(username="new_owner_username")
 
-# Transfer current bot using email
+# Transfer current bot by email
 Bot.Transfer(email="owner@example.com")
 
 # Transfer a specific bot you own
-Bot.Transfer(bot_id="your_other_bot_id", email="owner@example.com")
+Bot.Transfer(bot_id="other_bot_id", email="owner@example.com")
 ```
+
+---
 
 ### Bot.Clone
-Use this method to programmatically create an exact copy of the bot, including all its commands and code. If you provide a `bot_token`, the new bot will be attached to that token immediately.
+
+Creates an exact copy of the bot (all commands and code). Optionally assigns a new Telegram token immediately.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `bot_token` | String | No | A new BotFather token to assign to the cloned bot. If not provided, the clone is created without a token. |
+| `bot_id` | String | No | Bot to clone. Defaults to current bot. Can also clone another bot you own. |
+| `run_now` | Boolean | No | If `True`, starts the cloned bot immediately after creation. Default: `False`. |
+
+**Returns** `{"ok": True, "bot_id": "new_bot_id"}` on success.
 
 ```python BLP Example
-# Clone current bot to a new BotFather token
-Bot.Clone(bot_token="YOUR_NEW_BOT_TOKEN")
+# Clone current bot (no token yet)
+Bot.Clone()
 
-# Clone current bot and start it automatically
-Bot.Clone(bot_token="YOUR_NEW_BOT_TOKEN", run_now=True)
+# Clone and assign a new BotFather token
+Bot.Clone(bot_token="123456:ABC-DEF...")
+
+# Clone and start immediately
+Bot.Clone(bot_token="123456:ABC-DEF...", run_now=True)
 
 # Clone a specific bot you own
-Bot.Clone(bot_id="your_other_bot_id", bot_token="YOUR_NEW_BOT_TOKEN")
+Bot.Clone(bot_id="other_bot_id", bot_token="123456:ABC-DEF...")
 ```
-## Internal BLP Engine Methods
 
-### Next Command Handling
-You can explicitly tell the BLP engine which command to execute on the user's *next* message using `Bot.handleNextCommand()`.
+---
+
+## BLP Engine Methods
+
+These methods control the **BLP execution engine** and are specific to Bots.LT.
+
+### Bot.handleNextCommand
+
+Sets up a **wait state** for the next user input. The next message from the user will trigger the specified command instead of matching normally.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `command_name` | String | Yes | The command to trigger on the next user message (e.g., `"/save_name"`). |
+| `options` | Dict | No | Data to forward to the next command (accessible via `params` or extra context). |
+| `cancel_at_command` | Boolean | No | If `True`, wait state is cancelled if user sends a new bot command (e.g., `/start`). Default: `True`. |
+
+**Aliases:** `Bot.handleNextCommand`, `Bot.runCommandAfter` (see below)
 
 ```python BLP Example
-# Command 1 (/ask_name)
-Bot.sendMessage(u, "What is your name?")
-Bot.handleNextCommand("/save_name", {"temp": "data"})
+# In command /ask_name
+Bot.sendMessage(chat_id=u, text="What is your name?")
+Bot.handleNextCommand("/save_name", {"user_type": "premium"})
 
-# Command 2 (/save_name)
+# In command /save_name
 name = message.text
-Bot.sendMessage(u, f"Saved! Hello {name}.")
+data = params  # Contains {"user_type": "premium"} passed from previous step
+Bot.sendMessage(chat_id=u, text=f"Hello, {name}! You are a {data['user_type']} user.")
 ```
 
-### Triggering Other Commands
-You can programmatically trigger another command's code from within your current command using `Bot.runCommand()`.
+---
+
+### Bot.runCommand
+
+Programmatically triggers another command's code from within the current command.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `command_name` | String | Yes | The command to run (e.g., `"/help"`). |
+| `options` | Dict | No | Optional data to pass to the triggered command. |
 
 ```python BLP Example
-# Triggers the code inside the /help command
-Bot.runCommand("/help")
+# Trigger the /welcome command from /start
+Bot.runCommand("/welcome")
+
+# Pass data to the triggered command
+Bot.runCommand("/notify_admin", {"reason": "New user", "user_id": u})
+```
+
+---
+
+### Bot.runCommandAfter
+
+Schedules a command to run after a delay.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `seconds` | Integer | Yes | Delay in seconds before the command runs. |
+| `command_name` | String | Yes | The command to run after the delay. |
+| `options` | Dict | No | Optional data to pass to the command. |
+
+```python BLP Example
+Bot.sendMessage(chat_id=u, text="I'll remind you in 30 seconds!")
+Bot.runCommandAfter(30, "/remind_user", {"message": "Time is up!"})
+```
+
+---
+
+### Bot.broadcast
+
+Sends a message or runs a command for multiple users at once.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `code` | String | No | BLP code to execute for each user. |
+| `command` | String | No | Command name to run for each user. |
+| `mode` | String | No | `"single"` (current bot users) or `"all"` (all bots). Default: `"single"`. |
+| `speed` | Integer | No | Messages per second (1–50). Default: `8`. |
+| `bot_ids` | List | No | Specific bot IDs to broadcast to (for multi-bot broadcasts). |
+| `callback_url` | String | No | Webhook URL to call when broadcast is complete. |
+
+```python BLP Example
+# Broadcast a message to all bot users
+Bot.broadcast(
+    code='Bot.sendMessage(chat_id=u, text="Big announcement!")',
+    speed=10
+)
+
+# Broadcast by running a command for each user
+Bot.broadcast(
+    command="/send_news",
+    speed=5
+)
+```
+
+---
+
+### Bot.getBroadcastStatus
+
+Gets the status of a running or completed broadcast.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `broadcast_id` | String | Yes | ID of the broadcast to check. |
+
+```python BLP Example
+status = Bot.getBroadcastStatus("broadcast_abc123")
+Bot.sendMessage(
+    chat_id=u,
+    text=f"Status: {status.status}\nSent: {status.sent}\nFailed: {status.failed}"
+)
+```
+
+---
+
+### Bot.pauseBroadcast / Bot.resumeBroadcast / Bot.stopBroadcast
+
+Controls a running broadcast.
+
+| Method | Parameter | Description |
+|--------|-----------|-------------|
+| `Bot.pauseBroadcast(broadcast_id)` | `broadcast_id` | Pauses a running broadcast. |
+| `Bot.resumeBroadcast(broadcast_id, speed)` | `broadcast_id`, optional `speed` | Resumes a paused broadcast. |
+| `Bot.stopBroadcast(broadcast_id)` | `broadcast_id` | Permanently stops the broadcast. |
+
+```python BLP Example
+Bot.pauseBroadcast("broadcast_abc123")
+Bot.resumeBroadcast("broadcast_abc123", speed=20)
+Bot.stopBroadcast("broadcast_abc123")
 ```
