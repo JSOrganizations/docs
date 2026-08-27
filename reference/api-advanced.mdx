@@ -77,14 +77,31 @@ Bot.setChatMenuButton(
 )
 ```
 ### Bot.Transfer
-Use this method to programmatically transfer the ownership of the bot to another user via their registered email or username on the Bots.LT platform.
+Use this method to programmatically transfer the ownership of the bot to another user via their registered email or username on the Bots.LT platform. By default, it transfers the current bot, but you can also transfer another bot you own by passing `bot_id`.
 
 ```python BLP Example
-# Transfer using username
+# Transfer current bot using username
 Bot.Transfer(username="new_owner_username")
 
-# Or transfer using email
+# Transfer current bot using email
 Bot.Transfer(email="owner@example.com")
+
+# Transfer a specific bot you own
+Bot.Transfer(bot_id="your_other_bot_id", email="owner@example.com")
+```
+
+### Bot.Clone
+Use this method to programmatically create an exact copy of the bot, including all its commands and code. If you provide a `bot_token`, the new bot will be attached to that token immediately.
+
+```python BLP Example
+# Clone current bot to a new BotFather token
+Bot.Clone(bot_token="YOUR_NEW_BOT_TOKEN")
+
+# Clone current bot and start it automatically
+Bot.Clone(bot_token="YOUR_NEW_BOT_TOKEN", run_now=True)
+
+# Clone a specific bot you own
+Bot.Clone(bot_id="your_other_bot_id", bot_token="YOUR_NEW_BOT_TOKEN")
 ```
 ## Internal BLP Engine Methods
 
