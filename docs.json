@@ -32,7 +32,10 @@
           "reference/api-rich-messages",
           "reference/api-media",
           "reference/api-chats",
+          "reference/api-ephemeral",
+          "reference/api-business-gifts",
           "reference/api-keyboards",
+          "reference/api-stickers-games",
           "reference/api-advanced"
         ]
       },
