@@ -17,7 +17,7 @@ This system is ideal for storing text, configurations, and complex JSON data. Da
 |-------|--------|-------------|
 | **User** | `User` | Data stored per user (keyed by `user_id`). Each user has their own isolated data. |
 | **Bot** | `Bot` | Data stored globally for the entire bot. Shared across all users. |
-| **Api** | `Api` | Data shared across multiple bots owned by the same developer. |
+| **Account** | `Account` | Data shared across **all bots** owned by the developer. *(Legacy alias: `Api`)* |
 
 ---
 
@@ -155,6 +155,24 @@ Bot.sendDocument(
 
 ---
 
+### deleteAllData
+
+Deletes all data in the scope, with optional exclusions.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `except_data` | Array of String | No | List of data keys to preserve. |
+| `include_bot_data` | Boolean | No | Ignored (legacy parameter). |
+
+> **Note:** Available on the `Account` scope only.
+
+```python BLP Example
+result = Account.deleteAllData(except_data=["important_settings"])
+Bot.sendMessage(chat_id=u, text=f"Data cleared: {result['result']}")
+```
+
+---
+
 ### getBotUsersFile
 
 Exports the full list of users who have interacted with the bot.
@@ -194,6 +212,7 @@ Manage virtual balances, point systems, and leaderboards — without writing any
 | `Libs.Resources.userRes(name)` | Resource for the **current user**. |
 | `Libs.Resources.anotherRes(name, user_id)` | Resource for a **specific user** (by `user_id`). |
 | `Libs.Resources.globalRes(name)` | Shared resource for the **entire bot**. |
+| `Libs.Resources.accountRes(name)` | Shared resource across **all bots** you own. |
 
 ### Resource Methods
 
