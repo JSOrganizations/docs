@@ -76,7 +76,16 @@ Bot.setChatMenuButton(
     menu_button=jsondumps(menu_button)
 )
 ```
+### Bot.Transfer
+Use this method to programmatically transfer the ownership of the bot to another user via their registered email or username on the Bots.LT platform.
 
+```python BLP Example
+# Transfer using username
+Bot.Transfer(username="new_owner_username")
+
+# Or transfer using email
+Bot.Transfer(email="owner@example.com")
+```
 ## Internal BLP Engine Methods
 
 ### Next Command Handling

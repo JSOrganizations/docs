@@ -1,0 +1,79 @@
+---
+title: 'Data Storage & Wait States'
+description: 'Save user data and handle multi-step conversational flows.'
+---
+
+Bots.LT provides a robust Key-Value (KV) storage system and Wait State managers. You do not need an external database to build complex bots!
+
+## Data Storage (KV Store)
+
+You can save and retrieve data across three different scopes: `User`, `Bot`, and `Api`.
+
+### Storage Methods
+
+The following methods are available on all scopes:
+
+- **`saveData(key, value)`**: Saves a value to the database. (Aliases: `setProperty`, `setProp`)
+- **`getData(key)`**: Retrieves a value from the database. (Aliases: `getProperty`, `getProp`)
+- **`deleteData(key)`**: Deletes a value from the database. (Aliases: `deleteProperty`, `deleteProp`)
+
+```python BLP Example
+# Using standard methods
+User.saveData("language", "English")
+lang = User.getData("language")
+
+# Using short aliases
+User.setProp("theme", "dark")
+theme = User.getProp("theme")
+```
+
+---
+
+## Wait States (Conversational Flows)
+
+Often, you need to ask a user a question and "wait" for their next message (e.g., asking for a name, email, or amount). You can handle this easily using **Wait States**.
+
+### `Bot.handleNextCommand(command, **options)`
+
+This method tells the bot: *"When this user sends their very next message, immediately route it to the specified command, regardless of what they typed."*
+
+#### Basic Example
+Imagine you have two commands: `/start` and `/save_name`.
+
+**Command 1: `/start`**
+```python BLP Example
+Bot.sendMessage(chat_id=u, text="Please enter your full name:")
+
+# Route the user's next message to the /save_name command
+Bot.handleNextCommand("/save_name")
+```
+
+**Command 2: `/save_name`**
+```python BLP Example
+# message.text contains whatever they typed
+name = message.text
+User.saveData("name", name)
+Bot.sendMessage(chat_id=u, text=f"Thanks, {name}! Your name has been saved.")
+```
+
+#### Passing Data Between Commands (Options)
+You can forward temporary data to the next command by passing it as keyword arguments (`**options`).
+
+**Command 1: `/ask_age`**
+```python BLP Example
+Bot.sendMessage(chat_id=u, text="How old are you?")
+
+# Pass temporary data (e.g., step=2) to the next command
+Bot.handleNextCommand("/save_age", step=2, temp_name="John")
+```
+
+**Command 2: `/save_age`**
+```python BLP Example
+# Access the passed options globally via the `options` dictionary
+step = options.get("step")
+temp_name = options.get("temp_name")
+
+Bot.sendMessage(chat_id=u, text=f"Step {step}: {temp_name} is {message.text} years old.")
+```
+
+*Note: Wait states are extremely powerful for building multi-step forms, quizzes, and registration flows without needing complex database flags.*

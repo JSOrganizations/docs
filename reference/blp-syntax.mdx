@@ -63,6 +63,16 @@ The unique identifier of your bot on the Bots Limited platform.
 
 *Note: You can also access these variables via the `Bot` object (e.g., `Bot.username`, `Bot.token`, `Bot.first_name`, `Bot.userstat`, `Bot.owner_email`).*
 
+### `Bot` vs `bot` (The Core Bot Object)
+In BLP, the Telegram engine is injected as the `Bot` object (which handles all API calls like `Bot.sendMessage`). 
+For convenience and flexibility, **`Bot` and `bot` are 100% interchangeable aliases**. Every method that works on `Bot` also works identically on `bot`.
+
+```python BLP Example
+Bot.sendMessage(chat_id=u, text="Hello!")
+# is exactly the same as:
+bot.sendMessage(chat_id=u, text="Hello!")
+```
+
 ### Commands & Inputs
 
 #### `command`

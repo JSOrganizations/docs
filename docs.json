@@ -21,7 +21,8 @@
         "group": "Language Reference",
         "pages": [
           "reference/commands",
-          "reference/blp-syntax"
+          "reference/blp-syntax",
+          "reference/api-storage-state"
         ]
       },
       {
@@ -37,6 +38,7 @@
       {
         "group": "Core Libraries (Libs)",
         "pages": [
+          "reference/api-libraries",
           "libraries/bot-wrapper"
         ]
       }
