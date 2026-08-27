@@ -1,71 +1,63 @@
 ---
 title: 'BLP Syntax & Variables'
-description: 'Understanding the Restricted Python environment and built-in variables'
+description: 'Understanding the Restricted Python environment and built-in global variables.'
 ---
 
-Bots Limited uses a custom execution environment called **BLP** (Bots.LT Python). BLP is built on top of standard Python 3, but with specific security restrictions to ensure safe execution on our cloud platform.
+Bots.LT uses a custom execution environment called **BLP** (Bots.LT Python). BLP is built on top of standard Python 3, but with specific security restrictions to ensure safe and blazing-fast execution on our cloud platform.
 
 ## What is Restricted Python?
 
-When you write commands in Bots Limited, you are writing Python code. However, you cannot use operations that could compromise the server:
+When you write commands in Bots.LT, you are writing Python code. However, you cannot use operations that could compromise the server:
 - `import` statements are blocked.
 - `open()`, `eval()`, and `exec()` are blocked.
-- Infinite loops (`while True`) are heavily restricted or blocked to prevent execution timeouts.
+- `time.sleep()` is blocked.
+- Infinite loops (`while True`) are blocked to prevent execution timeouts.
 
-Instead of importing modules, Bots Limited injects safe **Built-in Objects and Variables** directly into your code.
+Instead of importing modules, Bots.LT injects safe **Built-in Objects and Variables** directly into your code.
 
 ---
 
 ## Global Variables
 
-Whenever a command runs, the following variables are automatically available in your code. You do NOT need to define or import them.
+Whenever a command runs, the following variables are automatically available in your code. You **do NOT** need to define or import them.
 
-### User & Chat Identification
+### Context Variables
 
-#### `chat_id` / `u`
-An integer representing the Telegram ID of the user or group that triggered the command. Both `chat_id` and `u` are identical and can be used interchangeably.
-```python BLP Example
-Bot.sendMessage(chat_id=chat_id, text="Hello!")
-Bot.sendMessage(chat_id=u, text="Hello again!")
-
-# Or even shorter (automatically uses current chat_id):
-Bot.sendMessage("Hello just text!")
-```
-
-#### `message`
-A dictionary containing the raw Telegram Message object. 
-- `message.text`: The text the user sent.
-- `message.message_id`: The ID of the message.
-- `message.from.id`: The sender's user ID.
-- `message.from.first_name`: The sender's first name.
-- `message.from.username`: The sender's username.
-
-#### `call`
-If the command was triggered by an Inline Keyboard Button click (Callback Query), this variable contains the Telegram CallbackQuery object. Otherwise, it is `None`.
-- `call.id`: The unique ID for the query.
-- `call.data`: The callback data attached to the button.
+| Variable | Type | Description |
+|----------|------|-------------|
+| `u` / `chat_id` | Integer | The Telegram ID of the user or group that triggered the command. Both are identical and interchangeable. |
+| `message` | DotDict | The raw Telegram Message object. Supports dot notation (e.g., `message.text`, `message.from.first_name`). |
+| `call` | DotDict | The Telegram CallbackQuery object (if triggered by an inline button). Otherwise `None`. |
+| `user` | DotDict | The Telegram User object of the sender. Supports dot notation (e.g., `user.id`, `user.username`). |
+| `command` | String | The exact command string that was triggered (e.g., `"/start"`). |
+| `params` | String | Any text that comes *after* the command. For example, if user sends `/start 123`, `params` is `"123"`. |
+| `msg` | String | The text of the message or the callback data (if inline button clicked). |
 
 ### Bot Details
 
-You can access your bot's dynamic details using these injected variables:
+| Variable | Type | Description |
+|----------|------|-------------|
+| `bot_id` | String | The unique identifier of your bot on the Bots.LT platform. |
+| `bot_token` | String | Your bot's private BotFather token. |
+| `bot_username` | String | The Telegram username of your bot (without the `@`). |
+| `bot_name` | String | The display name of your bot. |
 
-#### `bot_username`
-The Telegram username of your bot (e.g., `my_awesome_bot`).
+```python BLP Example
+# Using injected variables
+Bot.sendMessage(chat_id=u, text=f"Hello, {user.first_name}! You sent {command} with params {params}.")
 
-#### `bot_token`
-Your bot's private API token.
+# Handling callbacks
+if call:
+    Bot.answerCallbackQuery(callback_query_id=call.id, text="Loading...")
+```
 
-#### `bot_name`
-The display name of your bot.
+---
 
-#### `bot_id`
-The unique identifier of your bot on the Bots Limited platform.
+## The `Bot` Object
 
-*Note: You can also access these variables via the `Bot` object (e.g., `Bot.username`, `Bot.token`, `Bot.first_name`, `Bot.userstat`, `Bot.owner_email`).*
+In BLP, the Telegram engine is injected as the `Bot` object. This object handles all API calls like `Bot.sendMessage`. 
 
-### `Bot` vs `bot` (The Core Bot Object)
-In BLP, the Telegram engine is injected as the `Bot` object (which handles all API calls like `Bot.sendMessage`). 
-For convenience and flexibility, **`Bot` and `bot` are 100% interchangeable aliases**. Every method that works on `Bot` also works identically on `bot`.
+> **Note:** For convenience and flexibility, **`Bot` and `bot` are 100% interchangeable aliases**. Every method that works on `Bot` also works identically on `bot`.
 
 ```python BLP Example
 Bot.sendMessage(chat_id=u, text="Hello!")
@@ -73,64 +65,41 @@ Bot.sendMessage(chat_id=u, text="Hello!")
 bot.sendMessage(chat_id=u, text="Hello!")
 ```
 
-### Commands & Inputs
-
-#### `command`
-The raw string of the command that was matched.
-
-#### `params`
-Any text that comes *after* the command. 
-For example, if the user sends `/start 12345`, the `command` variable is `/start` and `params` is `12345`.
-
 ---
 
 ## Built-in Modules
 
-We provide safe wrappers for common Python functionalities.
+We provide safe wrappers for common Python functionalities directly in the global scope.
 
-### `time`
-A safe wrapper for time functions.
-- `time.time()`: Returns the current UNIX timestamp.
+| Module/Function | Description |
+|-----------------|-------------|
+| `time` | A safe wrapper. `time.time()` returns the current UNIX timestamp. |
+| `re` / `regex` | The standard Python regular expressions module. |
+| `hashlib` | For generating hashes (MD5, SHA256, etc.). |
+| `base64` | For base64 encoding and decoding. |
+| `jsondumps(obj)` | Safely converts a Python dictionary/list to a JSON string. |
+| `bf_json(string)` | Safely parses a JSON string into a Python dictionary. |
+| `encodeURIComponent(str)` | URL-encodes a string. |
+| `decodeURIComponent(str)` | URL-decodes a string. |
+| `isNumeric(val)` | Returns `True` if the value can be converted to a float/int. |
 
-### `re` / `regex`
-The standard Python `re` module for regular expressions.
-
-### `hashlib` & `base64`
-For cryptography and encoding.
-
-### `jsondumps` & `bf_json`
-Functions for parsing and formatting JSON strings safely.
+```python BLP Example
+# Using built-ins
+current_ts = time.time()
+encoded = base64.b64encode(b"Hello").decode('utf-8')
+json_str = jsondumps({"status": "ok"})
+```
 
 ---
 
 ## Data Storage Scopes
 
-You do not need an external database. Bots Limited provides a blazing-fast built-in Key-Value (KV) store accessible via three scopes:
+You do not need an external database. Bots.LT provides a blazing-fast built-in Key-Value (KV) store accessible via three scopes:
 
-### 1. `User` (User Scope)
-Data is saved for the specific user (`chat_id`) interacting with the bot.
-```python BLP Example
-User.saveData("balance", 100)
-current_balance = User.getData("balance")
+| Scope | Description | Usage |
+|-------|-------------|-------|
+| `User` | Data is saved for the specific user (`chat_id`). | `User.saveData("balance", 100)` |
+| `Bot` | Data is saved globally for the entire bot. | `Bot.saveData("total_users", 5000)` |
+| `Api` | Data shared across multiple bots owned by you. | `Api.saveData("dev_api_key", "secret123")` |
 
-# Export all user data
-file = User.getAllDataOfUser(u)
-Bot.sendDocument(u, file)
-```
-
-### 2. `Bot` (Bot Scope)
-Data is saved globally for the entire bot (e.g., global stats, settings).
-```python BLP Example
-Bot.saveData("total_users", 5000)
-total = Bot.getData("total_users")
-
-# Export all bot users
-csv = Bot.getBotUsersFile(output_format="csv")
-Bot.sendDocument(u, csv)
-```
-
-### 3. `Api` (Global/Developer Scope)
-Used for data shared across multiple bots owned by the same developer.
-```python BLP Example
-Api.saveData("dev_api_key", "secret123")
-```
+*See the **Data Storage & Wait States** section for more details on these scopes.*

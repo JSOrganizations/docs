@@ -1,50 +1,102 @@
 ---
 title: 'Command Routing'
-description: 'How to handle user messages and events using commands'
+description: 'How to handle user messages, events, and wildcards using BLP commands.'
 ---
 
-In Bots Limited, every piece of logic is triggered by a **Command**. A command is a specific string or pattern that the platform listens for.
+In Bots.LT, every piece of logic is triggered by a **Command**. A command is a specific string or pattern that the platform listens for from the Telegram API.
+
+---
 
 ## Command Types
 
 ### 1. Exact Match Commands
+
 The most common type of command. If a user types exactly this string, the corresponding code executes.
-- Example: `/start`, `/help`, `Menu`
+
+| Command Name | Description |
+|--------------|-------------|
+| `/start` | Triggered when a user starts the bot. |
+| `/help` | Triggered when a user types `/help`. |
+| `Menu` | Triggered when a user sends the exact text "Menu" (case-sensitive). |
+
+---
 
 ### 2. Wildcard Command (`*`)
-The wildcard command catches **any message** that doesn't match an exact command. 
-This is useful for:
-- Chatbots using AI (ChatGPT/Gemini)
-- Catch-all fallback messages ("I don't understand that command.")
-- Tracking user state.
 
-### 3. Before All Command (`@`)
-The `@` command is special. If it exists, it runs **before any other command**. 
-- It is commonly used for **middleware**, such as checking if a user is banned, checking if a user joined a required channel (Force Sub), or logging activity.
-- If you call `ReturnCommand()` inside the `@` command, the execution stops, and the actual triggered command will **not** run.
+The `*` command acts as a **catch-all**. It catches **any text message** that doesn't match an exact command.
 
-<CodeGroup>
+**Common Use Cases:**
+- Chatbots using AI (ChatGPT/Gemini) that need to process natural language.
+- Catch-all fallback messages ("I don't understand that command.").
+- Tracking user state or processing conversational inputs.
 
-```python Checking for Banned Users (@ command)
-# Check if user is in our ban list
-if User.getData("banned") == "true":
-    Bot.sendMessage(chat_id, "You are banned from using this bot.")
-    ReturnCommand() # Stops execution here
+```python BLP Example (AI Chatbot)
+# Inside the * command
+user_text = message.text
+
+# Process with AI (pseudo-code)
+# response = call_ai_api(user_text)
+
+Bot.sendMessage(chat_id=u, text="You said: " + user_text)
 ```
 
-</CodeGroup>
+---
+
+### 3. Before All Command (`@`)
+
+The `@` command is a special **middleware** command. If it exists, it runs **before any other command**.
+
+**Common Use Cases:**
+- Checking if a user is banned globally.
+- Enforcing channel membership (Force Sub).
+- Logging user activity before processing their request.
+
+> **Important:** If you call `ReturnCommand()` inside the `@` command, the execution stops immediately, and the actual triggered command will **not** run.
+
+```python BLP Example (Ban Check Middleware)
+# Inside the @ command
+
+banned = User.getData("banned")
+if banned == "true":
+    Bot.sendMessage(chat_id=u, text="🚫 You are banned from using this bot.")
+    ReturnCommand() # Stops execution here. The target command won't run.
+
+# If not banned, the script naturally finishes and the target command executes.
+```
+
+---
 
 ## Special Event Handlers
 
-Aside from text messages, Telegram sends other types of updates (like button clicks, photo uploads, or new members joining). Bots Limited maps these to special command names:
+Aside from text messages, Telegram sends other types of updates (like button clicks, photo uploads, or new members joining). Bots.LT maps these events to special built-in command names.
 
-- `/handler_callback_query`: Triggered when a user clicks an `InlineKeyboardButton`.
-- `/handler_photo`: Triggered when a user sends an image.
-- `/handler_document`: Triggered when a user sends a file.
-- `/handler_new_chat_members`: Triggered when someone joins a group.
-- `/handler_left_chat_member`: Triggered when someone leaves a group.
-- `/handler_my_chat_member`: Triggered when the bot is kicked or added to a group.
+| Event Command | Trigger Condition | Available Context |
+|---------------|-------------------|-------------------|
+| `/handler_callback_query` | User clicks an `InlineKeyboardButton`. | `call.data` contains the callback string. |
+| `/handler_photo` | User sends a photo. | `message.photo` contains the photo array. |
+| `/handler_video` | User sends a video. | `message.video` contains the video object. |
+| `/handler_document` | User sends a file/document. | `message.document` contains the document object. |
+| `/handler_audio` | User sends an audio file. | `message.audio` contains the audio object. |
+| `/handler_voice` | User sends a voice note. | `message.voice` contains the voice object. |
+| `/handler_new_chat_members` | Someone joins a group. | `message.new_chat_members` array. |
+| `/handler_left_chat_member` | Someone leaves a group. | `message.left_chat_member` object. |
+| `/handler_my_chat_member` | The bot is added/removed from a group. | `message.my_chat_member` object. |
 
-<Note>
-Inside `/handler_callback_query`, the text of the button click is available in the `message.data` or `msg` variable.
-</Note>
+```python BLP Example (Handling Callbacks)
+# Inside /handler_callback_query
+
+data = call.data
+
+if data == "btn_accept":
+    Bot.answerCallbackQuery(callback_query_id=call.id, text="Accepted!")
+    Bot.sendMessage(chat_id=u, text="You accepted the terms.")
+```
+
+```python BLP Example (Handling Photos)
+# Inside /handler_photo
+
+# The photo array contains different sizes. The last one is the highest quality.
+photo_id = message.photo[-1].file_id
+
+Bot.sendMessage(chat_id=u, text=f"Nice photo! The file ID is: {photo_id}")
+```
