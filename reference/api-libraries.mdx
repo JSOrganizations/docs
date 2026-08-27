@@ -167,60 +167,59 @@ else:
 
 ---
 
-## Libs.Resources
+## Libs.AI
 
-Manage virtual balances, point systems, and leaderboards — without writing any database queries.
+Integrate powerful Large Language Models directly into your bot. Bots.LT currently supports OpenAI and Google Gemini.
 
-### Accessing Resources
+> **Note:** To use these APIs, you must pass your own API keys. You can store your API keys safely using `Bot.saveData("openai_key", "sk-...")`.
 
-| Method | Description |
-|--------|-------------|
-| `Libs.Resources.userRes(name)` | Resource for the **current user**. |
-| `Libs.Resources.anotherRes(name, user_id)` | Resource for a **specific user** (by `user_id`). |
-| `Libs.Resources.globalRes(name)` | Shared resource for the **entire bot**. |
+### askOpenAI
 
-### Resource Methods
+Calls the OpenAI Chat Completions API (e.g. ChatGPT).
 
-Once accessed, each resource object supports:
-
-| Method | Description |
-|--------|-------------|
-| `.value()` | Returns current value as Integer or Float. |
-| `.add(amount)` | Adds `amount` to the resource. |
-| `.cut(amount)` | Subtracts `amount` from the resource. |
-| `.set(amount)` | Sets resource to an exact value. |
-| `.reset()` | Resets value to `0`. |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `api_key` | String | Yes | Your OpenAI API key. |
+| `prompt` | String | Yes | The user's prompt or message. |
+| `model` | String | No | Model to use. Default: `"gpt-3.5-turbo"`. |
+| `system_prompt` | String | No | Instructions for the model's behavior. |
+| `max_tokens` | Integer | No | Max tokens for the response. Default: `1000`. |
 
 ```python BLP Example
-# Get current user's coins
-coins = Libs.Resources.userRes("coins")
+api_key = Bot.getData("openai_key")
+response = Libs.AI.askOpenAI(
+    api_key=api_key,
+    prompt=message.text,
+    model="gpt-4o",
+    system_prompt="You are a helpful assistant."
+)
 
-current = coins.value()
-Bot.sendMessage(chat_id=u, text=f"💰 You have {current} coins")
-
-# Reward coins
-coins.add(50)
-
-# Deduct coins
-if coins.value() >= 10:
-    coins.cut(10)
-    Bot.sendMessage(chat_id=u, text="You spent 10 coins!")
-else:
-    Bot.sendMessage(chat_id=u, text="Not enough coins!")
+Bot.sendMessage(chat_id=u, text=response)
 ```
 
-```python BLP Example (Leaderboard)
-# Get the top 10 users by "points"
-top = Libs.Resources.getTop("points", limit=10)
-lines = [f"{i+1}. User {r['user_id']}: {r['value']} pts" for i, r in enumerate(top)]
-Bot.sendMessage(chat_id=u, text="\n".join(lines))
-```
+---
 
-```python BLP Example (Shared Global Counter)
-# Increment a global visits counter
-visits = Libs.Resources.globalRes("total_visits")
-visits.add(1)
-Bot.sendMessage(chat_id=u, text=f"Total bot visits: {visits.value()}")
+### askGemini
+
+Calls the Google Gemini API (Generative Language).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `api_key` | String | Yes | Your Google Gemini API key. |
+| `prompt` | String | Yes | The user's prompt or message. |
+| `model` | String | No | Model to use. Default: `"gemini-1.5-flash"`. |
+| `system_prompt` | String | No | Instructions for the model's behavior. |
+
+```python BLP Example
+api_key = Bot.getData("gemini_key")
+response = Libs.AI.askGemini(
+    api_key=api_key,
+    prompt=message.text,
+    model="gemini-1.5-flash",
+    system_prompt="Answer in short sentences."
+)
+
+Bot.sendMessage(chat_id=u, text=response)
 ```
 
 ---

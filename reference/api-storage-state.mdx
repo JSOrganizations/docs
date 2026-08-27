@@ -1,15 +1,15 @@
 ---
-title: 'Data Storage & Wait States'
-description: 'Save and retrieve user/bot/global data and handle multi-step conversational flows.'
+title: 'Data Management & States'
+description: 'Save and retrieve String/JSON data, handle Numeric resources, and manage multi-step conversational flows.'
 ---
 
-Bots.LT provides a built-in **Key-Value (KV) store** with three scopes and a **wait state** system for multi-step conversations. No external database is needed.
+Bots.LT provides a built-in **Key-Value (KV) store** with three scopes for String/JSON data, a **Resource system** for numeric data (like coins/points), and a **wait state** system for multi-step conversations. No external database is needed.
 
 ---
 
-## Data Storage
+## 1. String & JSON Data (Properties)
 
-Data is stored and retrieved using three scope objects, each with the same set of methods.
+This system is ideal for storing text, configurations, and complex JSON data. Data is stored and retrieved using three scope objects, each with the same set of methods.
 
 ### Scopes
 
@@ -183,7 +183,65 @@ Bot.sendDocument(chat_id=u, document=file, caption="📊 Bot Users Report")
 
 ---
 
-## Wait States (Conversational Flows)
+## 2. Numeric Data (Resources)
+
+Manage virtual balances, point systems, and leaderboards — without writing any database queries. This is the recommended way to handle **numbers and math-based data**.
+
+### Accessing Resources
+
+| Method | Description |
+|--------|-------------|
+| `Libs.Resources.userRes(name)` | Resource for the **current user**. |
+| `Libs.Resources.anotherRes(name, user_id)` | Resource for a **specific user** (by `user_id`). |
+| `Libs.Resources.globalRes(name)` | Shared resource for the **entire bot**. |
+
+### Resource Methods
+
+Once accessed, each resource object supports:
+
+| Method | Description |
+|--------|-------------|
+| `.value()` | Returns current value as Integer or Float. |
+| `.add(amount)` | Adds `amount` to the resource. |
+| `.cut(amount)` | Subtracts `amount` from the resource. |
+| `.set(amount)` | Sets resource to an exact value. |
+| `.reset()` | Resets value to `0`. |
+
+```python BLP Example
+# Get current user's coins
+coins = Libs.Resources.userRes("coins")
+
+current = coins.value()
+Bot.sendMessage(chat_id=u, text=f"💰 You have {current} coins")
+
+# Reward coins
+coins.add(50)
+
+# Deduct coins
+if coins.value() >= 10:
+    coins.cut(10)
+    Bot.sendMessage(chat_id=u, text="You spent 10 coins!")
+else:
+    Bot.sendMessage(chat_id=u, text="Not enough coins!")
+```
+
+```python BLP Example (Leaderboard)
+# Get the top 10 users by "points"
+top = Libs.Resources.getTop("points", limit=10)
+lines = [f"{i+1}. User {r['user_id']}: {r['value']} pts" for i, r in enumerate(top)]
+Bot.sendMessage(chat_id=u, text="\n".join(lines))
+```
+
+```python BLP Example (Shared Global Counter)
+# Increment a global visits counter
+visits = Libs.Resources.globalRes("total_visits")
+visits.add(1)
+Bot.sendMessage(chat_id=u, text=f"Total bot visits: {visits.value()}")
+```
+
+---
+
+## 3. Wait States (Conversational Flows)
 
 Use wait states to build **multi-step conversations** — asking users for input one step at a time, like forms, quizzes, or registration wizards.
 
