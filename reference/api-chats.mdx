@@ -1,64 +1,57 @@
 ---
-title: 'Chat & Members'
-description: 'Telegram API methods for managing groups, channels, and members.'
+title: 'Chats & Members'
+description: 'Manage groups, channels, members, and chat permissions.'
 ---
 
-## banChatMember
+This section covers administrative and management methods for Chats and Members in the Telegram Bot API.
 
+## Member Management
+
+### banChatMember
 Use this method to ban a user in a group, a supergroup or a channel.
 
 ```python BLP Example
 Bot.banChatMember(
-    chat_id=group_id,
-    user_id=target_user_id
+    chat_id=message.chat.id,
+    user_id=message.reply_to_message.from.id,
+    revoke_messages=True
 )
 ```
 
----
-
-## unbanChatMember
-
+### unbanChatMember
 Use this method to unban a previously banned user in a supergroup or channel.
 
 ```python BLP Example
 Bot.unbanChatMember(
-    chat_id=group_id,
-    user_id=target_user_id,
+    chat_id=message.chat.id,
+    user_id=message.reply_to_message.from.id,
     only_if_banned=True
 )
 ```
 
----
-
-## restrictChatMember
-
+### restrictChatMember
 Use this method to restrict a user in a supergroup.
 
 ```python BLP Example
 permissions = {
     "can_send_messages": False,
-    "can_send_media_messages": False,
-    "can_send_other_messages": False,
-    "can_add_web_page_previews": False
+    "can_send_media_messages": False
 }
 
 Bot.restrictChatMember(
-    chat_id=group_id,
-    user_id=target_user_id,
-    permissions=permissions
+    chat_id=message.chat.id,
+    user_id=message.reply_to_message.from.id,
+    permissions=jsondumps(permissions)
 )
 ```
 
----
-
-## promoteChatMember
-
+### promoteChatMember
 Use this method to promote or demote a user in a supergroup or a channel.
 
 ```python BLP Example
 Bot.promoteChatMember(
-    chat_id=group_id,
-    user_id=target_user_id,
+    chat_id=message.chat.id,
+    user_id=message.reply_to_message.from.id,
     can_change_info=True,
     can_delete_messages=True,
     can_invite_users=True,
@@ -68,35 +61,228 @@ Bot.promoteChatMember(
 )
 ```
 
----
-
-## setChatTitle & setChatDescription
-
-Use these methods to change the title or description of a chat.
+### setChatAdministratorCustomTitle
+Use this method to set a custom title for an administrator in a supergroup promoted by the bot.
 
 ```python BLP Example
-Bot.setChatTitle(
-    chat_id=group_id,
-    title="New Awesome Group Name"
+Bot.setChatAdministratorCustomTitle(
+    chat_id=message.chat.id,
+    user_id=message.reply_to_message.from.id,
+    custom_title="Bot Commander"
 )
+```
 
-Bot.setChatDescription(
-    chat_id=group_id,
-    description="Welcome to the most awesome group!"
+### banChatSenderChat
+Use this method to ban a channel chat in a supergroup or a channel. Until the chat is unbanned, the owner of the banned chat won't be able to send messages on behalf of any of their channels.
+
+```python BLP Example
+Bot.banChatSenderChat(
+    chat_id=message.chat.id,
+    sender_chat_id=message.reply_to_message.sender_chat.id
+)
+```
+
+### unbanChatSenderChat
+Use this method to unban a previously banned channel chat in a supergroup or channel.
+
+```python BLP Example
+Bot.unbanChatSenderChat(
+    chat_id=message.chat.id,
+    sender_chat_id=message.reply_to_message.sender_chat.id
 )
 ```
 
 ---
 
-## createChatInviteLink
+## Chat Management
 
+### setChatPermissions
+Use this method to set default chat permissions for all members.
+
+```python BLP Example
+permissions = {
+    "can_send_messages": True,
+    "can_send_media_messages": False,
+    "can_send_polls": False,
+    "can_send_other_messages": False,
+    "can_add_web_page_previews": False
+}
+
+Bot.setChatPermissions(
+    chat_id=message.chat.id,
+    permissions=jsondumps(permissions)
+)
+```
+
+### exportChatInviteLink
+Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked.
+
+```python BLP Example
+result = Bot.exportChatInviteLink(chat_id=message.chat.id)
+Bot.sendMessage(u, f"New Invite Link: {result.result}")
+```
+
+### createChatInviteLink
 Use this method to create an additional invite link for a chat.
 
 ```python BLP Example
-result = Bot.createChatInviteLink(
-    chat_id=group_id,
-    member_limit=10 # Link expires after 10 uses
+Bot.createChatInviteLink(
+    chat_id=message.chat.id,
+    name="VIP Access",
+    member_limit=10,
+    creates_join_request=False
 )
+```
 
-Bot.sendMessage(u, f"Your invite link: {result['invite_link']}")
+### editChatInviteLink
+Use this method to edit a non-primary invite link created by the bot.
+
+```python BLP Example
+Bot.editChatInviteLink(
+    chat_id=message.chat.id,
+    invite_link="https://t.me/joinchat/XXXX",
+    name="Expired Link",
+    member_limit=1
+)
+```
+
+### revokeChatInviteLink
+Use this method to revoke an invite link created by the bot.
+
+```python BLP Example
+Bot.revokeChatInviteLink(
+    chat_id=message.chat.id,
+    invite_link="https://t.me/joinchat/XXXX"
+)
+```
+
+### approveChatJoinRequest
+Use this method to approve a chat join request.
+
+```python BLP Example
+Bot.approveChatJoinRequest(
+    chat_id=message.chat.id,
+    user_id=message.from.id
+)
+```
+
+### declineChatJoinRequest
+Use this method to decline a chat join request.
+
+```python BLP Example
+Bot.declineChatJoinRequest(
+    chat_id=message.chat.id,
+    user_id=message.from.id
+)
+```
+
+### setChatPhoto
+Use this method to set a new profile photo for the chat.
+
+```python BLP Example
+# Assuming you have a photo file ID
+Bot.setChatPhoto(
+    chat_id=message.chat.id,
+    photo="AgACAgIAAxkBAAMrZN..."
+)
+```
+
+### deleteChatPhoto
+Use this method to delete a chat photo.
+
+```python BLP Example
+Bot.deleteChatPhoto(chat_id=message.chat.id)
+```
+
+### setChatTitle
+Use this method to change the title of a chat.
+
+```python BLP Example
+Bot.setChatTitle(
+    chat_id=message.chat.id,
+    title="My Awesome Group"
+)
+```
+
+### setChatDescription
+Use this method to change the description of a group, a supergroup or a channel.
+
+```python BLP Example
+Bot.setChatDescription(
+    chat_id=message.chat.id,
+    description="Welcome to the best group on Telegram!"
+)
+```
+
+### pinChatMessage
+Use this method to add a message to the list of pinned messages in a chat.
+
+```python BLP Example
+Bot.pinChatMessage(
+    chat_id=message.chat.id,
+    message_id=message.reply_to_message.message_id,
+    disable_notification=True
+)
+```
+
+### unpinChatMessage
+Use this method to remove a message from the list of pinned messages in a chat.
+
+```python BLP Example
+Bot.unpinChatMessage(
+    chat_id=message.chat.id,
+    message_id=message.reply_to_message.message_id
+)
+```
+
+### unpinAllChatMessages
+Use this method to clear the list of pinned messages in a chat.
+
+```python BLP Example
+Bot.unpinAllChatMessages(chat_id=message.chat.id)
+```
+
+### leaveChat
+Use this method for your bot to leave a group, supergroup or channel.
+
+```python BLP Example
+Bot.leaveChat(chat_id=message.chat.id)
+```
+
+---
+
+## Chat Information Retrievals
+
+### getChat
+Use this method to get up to date information about the chat.
+
+```python BLP Example
+result = Bot.getChat(chat_id=message.chat.id)
+# Extract info from result.result
+```
+
+### getChatAdministrators
+Use this method to get a list of administrators in a chat.
+
+```python BLP Example
+result = Bot.getChatAdministrators(chat_id=message.chat.id)
+```
+
+### getChatMemberCount
+Use this method to get the number of members in a chat.
+
+```python BLP Example
+result = Bot.getChatMemberCount(chat_id=message.chat.id)
+Bot.sendMessage(u, f"Total members: {result.result}")
+```
+
+### getChatMember
+Use this method to get information about a member of a chat.
+
+```python BLP Example
+result = Bot.getChatMember(
+    chat_id=message.chat.id,
+    user_id=u
+)
+Bot.sendMessage(u, f"User status: {result.result.status}")
 ```

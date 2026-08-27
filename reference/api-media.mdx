@@ -1,126 +1,152 @@
 ---
-title: 'Sending Media'
-description: 'Telegram API methods for sending photos, videos, and documents.'
+title: 'Media & Files'
+description: 'Send photos, audio, documents, video, and grouped media.'
 ---
 
-## sendPhoto
+This section covers all media and file-related methods available in the Telegram Bot API.
 
+## File Upload Methods
+
+In Bots Limited (BLP), you can send media in three different ways:
+
+1. **By URL:** Provide a direct HTTP/HTTPS URL. Telegram will download and send the file.
+2. **By File ID:** If the file is already on Telegram's servers, use its `file_id`.
+3. **By InputFile (Raw Bytes):** Use the `User.getDataFile()` or similar export methods to upload raw files dynamically from your backend.
+
+## Sending Media
+
+### sendPhoto
 Use this method to send photos.
 
 ```python BLP Example (URL)
 Bot.sendPhoto(
     chat_id=u,
     photo="https://example.com/image.jpg",
-    caption="Here is your photo!"
+    caption="Here is a **beautiful** photo!",
+    parse_mode="MarkdownV2"
 )
 ```
 
 ```python BLP Example (File ID)
 Bot.sendPhoto(
     chat_id=u,
-    photo="AgACAgIAAxkBAAMu...",
-    caption="Here is your photo!"
+    photo="AgACAgIAAxkBAAMrZN...",
+    caption="Here is a photo from a file ID."
 )
 ```
 
----
-
-## sendVideo
-
-Use this method to send video files, Telegram clients support mp4 videos.
+### sendAudio
+Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .MP3 or .M4A format.
 
 ```python BLP Example
-Bot.sendVideo(
+Bot.sendAudio(
     chat_id=u,
-    video="https://example.com/video.mp4",
-    caption="Watch this video!"
+    audio="https://example.com/song.mp3",
+    caption="Listen to this song!",
+    performer="Artist Name",
+    title="Song Title"
 )
 ```
 
----
-
-## sendDocument
-
+### sendDocument
 Use this method to send general files.
 
 ```python BLP Example
 Bot.sendDocument(
     chat_id=u,
     document="https://example.com/file.pdf",
-    caption="Please see the attached document."
+    caption="Here is the PDF file."
 )
 ```
 
----
-
-## sendAudio & sendVoice
-
-Use `sendAudio` for MP3 files (music), and `sendVoice` for OGG files (voice notes).
-
-```python sendAudio
-Bot.sendAudio(
+*Uploading a raw generated file using `InputFile`:*
+```python BLP Example
+file = User.getAllDataOfUser(u, output_format="json")
+Bot.sendDocument(
     chat_id=u,
-    audio="https://example.com/song.mp3",
-    title="My Song",
-    performer="Artist Name"
+    document=file,
+    caption="Here is your requested data export!"
 )
 ```
 
-```python sendVoice
+### sendVideo
+Use this method to send video files, Telegram clients support MP4 videos.
+
+```python BLP Example
+Bot.sendVideo(
+    chat_id=u,
+    video="https://example.com/video.mp4",
+    caption="Check out this video!",
+    supports_streaming=True
+)
+```
+
+### sendAnimation
+Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
+
+```python BLP Example
+Bot.sendAnimation(
+    chat_id=u,
+    animation="https://example.com/animation.gif",
+    caption="Funny GIF!"
+)
+```
+
+### sendVoice
+Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. The audio must be in an .OGG file encoded with OPUS.
+
+```python BLP Example
 Bot.sendVoice(
     chat_id=u,
-    voice="https://example.com/voice.ogg"
+    voice="https://example.com/voice.ogg",
+    caption="Voice message"
 )
 ```
 
----
+### sendVideoNote
+Use this method to send video messages. Telegram clients display these as rounded, square-cropped videos of up to 1 minute long.
 
-## sendMediaGroup (Albums)
+```python BLP Example
+Bot.sendVideoNote(
+    chat_id=u,
+    video_note="https://example.com/video_note.mp4",
+    length=360,
+    duration=60
+)
+```
 
+### sendMediaGroup
 Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type.
 
 ```python BLP Example
-media_array = [
-    {"type": "photo", "media": "https://example.com/1.jpg"},
-    {"type": "photo", "media": "https://example.com/2.jpg", "caption": "Group caption"}
+media_group = [
+    {"type": "photo", "media": "https://example.com/photo1.jpg"},
+    {"type": "photo", "media": "https://example.com/photo2.jpg", "caption": "Album caption"}
 ]
 
 Bot.sendMediaGroup(
     chat_id=u,
-    media=media_array
+    media=jsondumps(media_group)
 )
 ```
 
 ---
 
-## Location & Contacts
+## Editing Media
 
-### sendLocation
-```python BLP Example
-Bot.sendLocation(
-    chat_id=u,
-    latitude=40.7128,
-    longitude=-74.0060
-)
-```
+### editMessageMedia
+Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise.
 
-### sendVenue
 ```python BLP Example
-Bot.sendVenue(
-    chat_id=u,
-    latitude=40.7128,
-    longitude=-74.0060,
-    title="Central Park",
-    address="New York, NY"
-)
-```
+new_media = {
+    "type": "photo",
+    "media": "https://example.com/new_photo.jpg",
+    "caption": "Updated photo!"
+}
 
-### sendContact
-```python BLP Example
-Bot.sendContact(
+Bot.editMessageMedia(
     chat_id=u,
-    phone_number="+1234567890",
-    first_name="John",
-    last_name="Doe"
+    message_id=message.message_id,
+    media=jsondumps(new_media)
 )
 ```

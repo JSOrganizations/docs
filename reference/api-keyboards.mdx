@@ -1,99 +1,85 @@
 ---
-title: 'Interactive Keyboards'
-description: 'How to build Inline Keyboards and Custom Reply Keyboards using native objects.'
+title: 'Keyboards & Buttons'
+description: 'Build interactive inline and reply keyboards.'
 ---
 
-Bots Limited provides native Python classes to make building keyboards extremely easy, eliminating the need to write raw JSON strings.
-
-These classes are available globally in every command:
-- `InlineKeyboardMarkup`, `InlineKeyboardButton`
-- `ReplyKeyboardMarkup`, `KeyboardButton`, `ReplyKeyboardRemove`
-
----
+This section covers how to create and send interactive keyboards using the native Bot API classes available in the BLP environment.
 
 ## Inline Keyboards
 
-Inline keyboards appear below the message they belong to. When clicked, they can send a callback query to your bot, open a URL, or open a Web App.
+Inline keyboards appear attached to the message itself and can trigger callbacks or open URLs.
+
+### Sending an Inline Keyboard
+
+To send an inline keyboard, you need to construct a two-dimensional array of `InlineKeyboardButton` objects and wrap it in an `InlineKeyboardMarkup`.
 
 ```python BLP Example
-# Create a list of rows, where each row is a list of buttons
-keys = [
+keyboard = [
     [
         InlineKeyboardButton(text="Google", url="https://google.com"),
-        InlineKeyboardButton(text="Click Me", callback_data="my_button_data")
+        InlineKeyboardButton(text="Click Me!", callback_data="btn_clicked")
     ],
     [
-        InlineKeyboardButton(text="Open Web App", web_app="https://example.com")
+        InlineKeyboardButton(text="Open Web App", web_app="https://bots.lt")
     ]
 ]
 
-# Wrap the keys in the Markup class
-markup = InlineKeyboardMarkup(keys)
-
-# Send the message
-Bot.sendMessage(chat_id=u, text="Please choose an option:", reply_markup=markup)
+Bot.sendMessage(
+    chat_id=u,
+    text="Here is an inline keyboard:",
+    reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
+)
 ```
 
-### answerCallbackQuery
+### Answering Callback Queries (answerCallbackQuery)
 
-When a user clicks an `InlineKeyboardButton` with `callback_data`, Telegram shows a loading spinner on the button. You **must** answer the callback query to stop the spinner. This is typically done inside the `/handler_callback_query` command.
+When a user clicks an inline button containing `callback_data`, your bot will receive a `callback_query` update. You **must** answer this query using `answerCallbackQuery` to stop the loading icon on the user's button.
 
-```python BLP Example (Inside /handler_callback_query)
-Bot.answerCallbackQuery(
-    callback_query_id=call.id,
-    text="You clicked the button!",
-    show_alert=True # If True, shows an alert dialog instead of a small toast
-)
+```python BLP Example (Inside your callback handler)
+if call.data == "btn_clicked":
+    Bot.answerCallbackQuery(
+        callback_query_id=call.id,
+        text="You clicked the button!",
+        show_alert=True
+    )
 ```
 
 ---
 
-## Reply Keyboards
+## Reply Keyboards (Custom Keyboards)
 
-Reply keyboards replace the user's default text keyboard with custom buttons. These buttons just send text back to the chat as if the user typed it.
+Reply keyboards replace the user's default keyboard with custom buttons. These buttons send plain text messages when tapped.
+
+### Sending a Reply Keyboard
+
+Use `KeyboardButton` and `ReplyKeyboardMarkup`.
 
 ```python BLP Example
-keys = [
-    [
-        KeyboardButton(text="Contact Support"),
-        KeyboardButton(text="My Account")
-    ],
-    [
-        KeyboardButton(text="Send Phone Number", request_contact=True)
-    ]
+keyboard = [
+    [KeyboardButton(text="Button 1"), KeyboardButton(text="Button 2")],
+    [KeyboardButton(text="Share Contact", request_contact=True)],
+    [KeyboardButton(text="Share Location", request_location=True)]
 ]
 
-markup = ReplyKeyboardMarkup(
-    keyboard=keys,
-    resize_keyboard=True, # Makes the keyboard smaller
-    one_time_keyboard=True # Hides the keyboard after use
+Bot.sendMessage(
+    chat_id=u,
+    text="Please choose an option:",
+    reply_markup=ReplyKeyboardMarkup(
+        keyboard=keyboard,
+        resize_keyboard=True, # Makes the keyboard smaller
+        one_time_keyboard=True # Hides after one use
+    )
 )
-
-Bot.sendMessage(chat_id=u, text="Main Menu:", reply_markup=markup)
 ```
 
-### Removing the Reply Keyboard
+### Removing a Reply Keyboard
 
-To permanently remove a custom reply keyboard and restore the default text keyboard, use `ReplyKeyboardRemove`.
+To remove a custom reply keyboard and restore the user's default typing keyboard, use `ReplyKeyboardRemove`.
 
 ```python BLP Example
 Bot.sendMessage(
     chat_id=u,
-    text="Keyboard removed.",
+    text="Removing keyboard...",
     reply_markup=ReplyKeyboardRemove(remove_keyboard=True)
-)
-```
-
----
-
-## Force Reply
-
-Use this object to force a reply from the user. Telegram clients will automatically show the reply interface to the user.
-
-```python BLP Example
-Bot.sendMessage(
-    chat_id=u,
-    text="Please reply to this message with your name:",
-    reply_markup={"force_reply": True}
 )
 ```
