@@ -35,7 +35,7 @@ Bot.sendMessage(
 
 When a user clicks an inline button containing `callback_data`, your bot will receive a `callback_query` update. You **must** answer this query using `answerCallbackQuery` to stop the loading icon on the user's button.
 
-```python BLP Example (Inside your callback handler)
+```python BLP Example
 if call.data == "btn_clicked":
     Bot.answerCallbackQuery(
         callback_query_id=call.id,
