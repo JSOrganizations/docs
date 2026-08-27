@@ -21,66 +21,41 @@ This system is ideal for storing text, configurations, and complex JSON data. Da
 
 ---
 
-### saveData
+## User Data Methods
 
-Saves a value to the KV store.
+The `User` object isolates data specifically for the individual interacting with your bot.
 
-**Aliases:** `setProperty`, `setProp`
+### User.saveData
+
+Saves a value for the current user. (Aliases: `setProperty`, `setProp`)
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `key` | String | Yes | The key name to store data under. |
-| `value` | Any | Yes | The value to store. Can be string, number, list, or dict. |
+| `value` | Any | Yes | The value to store. |
 
 ```python BLP Example
-# Store user data
 User.saveData("name", "John Doe")
-User.saveData("balance", 1000)
-User.saveData("settings", {"theme": "dark", "lang": "en"})
-
-# Store bot-wide data
-Bot.saveData("total_users", 5000)
-Bot.saveData("announcement", "New features launched!")
-
-# Using aliases
 User.setProperty("language", "English")
-User.setProp("level", 5)
 ```
 
----
+### User.getData
 
-### getData
-
-Retrieves a stored value from the KV store. Returns `None` if key does not exist.
-
-**Aliases:** `getProperty`, `getProp`
+Retrieves a stored value for the current user. Returns `None` if it does not exist. (Aliases: `getProperty`, `getProp`)
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `key` | String | Yes | The key to retrieve. |
 
 ```python BLP Example
-# Get user data
 name = User.getData("name")
-balance = User.getData("balance")
-
 if name:
     Bot.sendMessage(chat_id=u, text=f"Welcome back, {name}!")
-else:
-    Bot.sendMessage(chat_id=u, text="You haven't set a name yet.")
-
-# Using aliases
-level = User.getProperty("level")
-lang = User.getProp("language")
 ```
 
----
+### User.deleteData
 
-### deleteData
-
-Deletes a key from the KV store.
-
-**Aliases:** `deleteProperty`, `deleteProp`
+Deletes a key from the user's data. (Aliases: `deleteProperty`, `deleteProp`)
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -88,17 +63,11 @@ Deletes a key from the KV store.
 
 ```python BLP Example
 User.deleteData("temp_token")
-
-# Using aliases
-User.deleteProperty("session_id")
-User.deleteProp("otp_code")
 ```
 
----
+### User.getDataFile
 
-### getDataFile
-
-Exports a stored value as a downloadable file.
+Exports a specific user value as a downloadable file.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -107,73 +76,112 @@ Exports a stored value as a downloadable file.
 
 ```python BLP Example
 file = User.getDataFile("settings", output_format="json")
-Bot.sendDocument(chat_id=u, document=file, caption="Your settings export")
-```
-
----
-
-### getAllData
-
-Gets all stored keys matching a pattern and returns them as a file.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | String | Yes | Pattern to match keys (partial match). |
-| `output_format` | String | No | `"json"` or `"txt"`. Default: `"json"`. |
-
-```python BLP Example
-# Export all user data keys containing "order"
-file = User.getAllData("order", output_format="json")
-Bot.sendDocument(chat_id=u, document=file, caption="Your order history")
-
-# Export all bot-wide data
-file = Bot.getAllData("", output_format="json")
 Bot.sendDocument(chat_id=u, document=file)
 ```
 
----
+### User.getAllData
 
-### getAllDataOfUser
+Gets all user keys matching a pattern across **all users**, returning a file.
 
-Exports all data stored for a specific user.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Pattern to match keys. |
+| `output_format` | String | No | `"json"` or `"txt"`. Default: `"json"`. |
+
+```python BLP Example
+# Get all 'order' keys from all users
+file = User.getAllData("order", output_format="json")
+Bot.sendDocument(chat_id=u, document=file)
+```
+
+### User.getAllDataOfUser
+
+Exports **all data** stored for a specific user.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `user` | Integer | Yes | The user ID to export data for. |
 | `output_format` | String | No | `"json"` or `"txt"`. Default: `"json"`. |
 
-> **Note:** This method is available on the `User` scope only.
-
 ```python BLP Example
 file = User.getAllDataOfUser(u, output_format="json")
-Bot.sendDocument(
-    chat_id=u,
-    document=file,
-    caption="📦 All your data from this bot"
-)
+Bot.sendDocument(chat_id=u, document=file, caption="All your data")
 ```
 
 ---
 
-### deleteAllData
+## Bot Data Methods
 
-Deletes all data in the scope, with optional exclusions.
+The `Bot` object stores global data that is shared across all users in the same bot.
+
+### Bot.saveData
+
+Saves a value globally for the bot.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `except_data` | Array of String | No | List of data keys to preserve. |
-| `include_bot_data` | Boolean | No | Ignored (legacy parameter). |
-
-> **Note:** Available on the `Account` scope only.
+| `key` | String | Yes | The key name to store data under. |
+| `value` | Any | Yes | The value to store. |
 
 ```python BLP Example
-result = Account.deleteAllData(except_data=["important_settings"])
-Bot.sendMessage(chat_id=u, text=f"Data cleared: {result['result']}")
+Bot.saveData("announcement", "New features launched!")
 ```
 
----
+### Bot.getData
 
-### getBotUsersFile
+Retrieves a stored value for the bot. Returns `None` if it does not exist.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | String | Yes | The key to retrieve. |
+
+```python BLP Example
+announcement = Bot.getData("announcement")
+if announcement:
+    Bot.sendMessage(chat_id=u, text=f"📢 {announcement}")
+```
+
+### Bot.deleteData
+
+Deletes a key from the bot's data.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | String | Yes | The key to delete. |
+
+```python BLP Example
+Bot.deleteData("temporary_maintenance_flag")
+```
+
+### Bot.getDataFile
+
+Exports a specific bot value as a downloadable file.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | The key to export. |
+| `output_format` | String | No | `"txt"` or `"json"`. Default: `"txt"`. |
+
+```python BLP Example
+file = Bot.getDataFile("config_rules")
+Bot.sendDocument(chat_id=u, document=file)
+```
+
+### Bot.getAllData
+
+Gets all bot keys matching a pattern, returning a file.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Pattern to match keys. |
+| `output_format` | String | No | `"json"` or `"txt"`. Default: `"json"`. |
+
+```python BLP Example
+file = Bot.getAllData("", output_format="json") # Export everything
+Bot.sendDocument(chat_id=u, document=file)
+```
+
+### Bot.getBotUsersFile
 
 Exports the full list of users who have interacted with the bot.
 
@@ -183,41 +191,101 @@ Exports the full list of users who have interacted with the bot.
 | `include_creation_date` | Boolean | No | If `True`, includes the date the user first interacted. |
 | `include_last_active_date` | Boolean | No | If `True`, includes the last activity date. |
 
-> **Note:** Available on the `Bot` scope only.
-
 ```python BLP Example
-# Export as JSON
-file = Bot.getBotUsersFile(output_format="json")
-Bot.sendDocument(chat_id=u, document=file)
-
-# Export as CSV with dates
-file = Bot.getBotUsersFile(
-    output_format="csv",
-    include_creation_date=True,
-    include_last_active_date=True
-)
-Bot.sendDocument(chat_id=u, document=file, caption="📊 Bot Users Report")
+file = Bot.getBotUsersFile(output_format="csv", include_creation_date=True)
+Bot.sendDocument(chat_id=u, document=file, caption="Bot Users Report")
 ```
 
 ---
 
-### Account Scope Details
+## Account Data Methods
 
-The `Account` object allows you to store data at the developer account level, making it accessible across **all bots** you own. 
+The `Account` object stores data at the developer account level, making it accessible across **all bots** you own.
 
-You can use all standard KV methods on the `Account` object (`Account.saveData`, `Account.getData`, `Account.deleteData`, `Account.getDataFile`, `Account.getAllData`). 
+### Account.saveData
+
+Stores data at the account level, accessible across all bots.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Name identifier for the data. |
+| `data` | Any | Yes | The data to store. |
 
 ```python BLP Example
-# Save settings across all your bots
 result = Account.saveData("global_settings", {"theme": "dark", "notifications": True})
 Bot.sendMessage(chat_id=u, text=f"Save result: {result['result']}")
-
-# Retrieve it from ANY of your bots
-settings = Account.getData("global_settings")
-Bot.sendMessage(chat_id=u, text=f"Theme: {settings['theme']}")
 ```
 
-#### Account.info
+### Account.getData
+
+Retrieves previously stored account data.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Name of the data to retrieve. |
+
+```python BLP Example
+settings = Account.getData("global_settings")
+if settings:
+    Bot.sendMessage(chat_id=u, text=f"Theme: {settings['theme']}")
+```
+
+### Account.deleteData
+
+Deletes account data by name.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Name of the data to delete. |
+
+```python BLP Example
+result = Account.deleteData("temp_data")
+Bot.sendMessage(chat_id=u, text=f"Delete result: {result['result']}")
+```
+
+### Account.getDataFile
+
+Returns account data as a file that can be sent to users.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Name of the data to retrieve. |
+| `output_format` | String | No | Format of the output file (e.g. `"txt"`, `"json"`). Default: `"txt"`. |
+
+```python BLP Example
+file = Account.getDataFile("report_data")
+Bot.sendDocument(chat_id=u, document=file)
+```
+
+### Account.getAllData
+
+Retrieves all account data entries, optionally filtered by name pattern.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | No | Name pattern to filter data. |
+| `output_format` | String | No | Format of the output file. Default: `"json"`. |
+
+```python BLP Example
+data_file = Account.getAllData("config_")
+Bot.sendDocument(chat_id=u, document=data_file)
+```
+
+### Account.deleteAllData
+
+Deletes all account data, with optional exclusions.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `except_data` | Array of String | No | List of data names to preserve. |
+| `include_bot_data` | Boolean | No | Ignored (legacy parameter). |
+
+```python BLP Example
+result = Account.deleteAllData(except_data=["important_settings"])
+Bot.sendMessage(chat_id=u, text=f"Data cleared: {result['result']}")
+```
+
+### Account.info
 
 Returns basic account information for the developer.
 
