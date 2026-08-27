@@ -25,8 +25,11 @@ Whenever a command runs, the following variables are automatically available in 
 #### `chat_id` / `u`
 An integer representing the Telegram ID of the user or group that triggered the command. Both `chat_id` and `u` are identical and can be used interchangeably.
 ```python BLP Example
-Bot.sendMessage(chat_id, "Hello!")
-Bot.sendMessage(u, "Hello again!")
+Bot.sendMessage(chat_id=chat_id, text="Hello!")
+Bot.sendMessage(chat_id=u, text="Hello again!")
+
+# Or even shorter (automatically uses current chat_id):
+Bot.sendMessage("Hello just text!")
 ```
 
 #### `message`
