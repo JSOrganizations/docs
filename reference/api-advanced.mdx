@@ -698,10 +698,74 @@ Bot.stopBroadcast("broadcast_abc123")
 ---
 
 ### sendInvoice
+
 Sends an invoice for payments.
 
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `title` | String | Yes | Product name, 1-32 characters. |
+| `description` | String | Yes | Product description, 1-255 characters. |
+| `payload` | String | Yes | Bot-defined invoice payload, 1-128 bytes. |
+| `currency` | String | Yes | Three-letter ISO 4217 currency code. |
+| `prices` | Array of Object | Yes | Price breakdown, a JSON-serialized list of components. |
+
+```python BLP Example
+Bot.sendInvoice(
+    chat_id=u,
+    title="Premium Plan",
+    description="1 month of premium features.",
+    payload="plan_monthly",
+    currency="USD",
+    prices=[{"label": "Premium", "amount": 999}]
+)
+```
+
+---
+
 ### createInvoiceLink
+
 Creates a link for an invoice.
 
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `title` | String | Yes | Product name. |
+| `description` | String | Yes | Product description. |
+| `payload` | String | Yes | Bot-defined invoice payload. |
+| `currency` | String | Yes | Three-letter ISO 4217 currency code. |
+| `prices` | Array of Object | Yes | Price breakdown. |
+
+```python BLP Example
+link = Bot.createInvoiceLink(
+    title="Premium Plan",
+    description="1 month of premium features.",
+    payload="plan_monthly",
+    currency="USD",
+    prices=[{"label": "Premium", "amount": 999}]
+)
+Bot.sendMessage(chat_id=u, text=f"Pay here: {link.result}")
+```
+
+---
+
 ### setPassportDataErrors
+
 Informs a user that some of the Telegram Passport elements they provided contains errors.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | User identifier. |
+| `errors` | Array of Object | Yes | A JSON-serialized array describing the errors. |
+
+```python BLP Example
+Bot.setPassportDataErrors(
+    user_id=u,
+    errors=[{
+        "source": "data",
+        "type": "personal_details",
+        "field_name": "first_name",
+        "data_hash": "hash_here",
+        "message": "First name mismatch"
+    }]
+)
+```

@@ -141,37 +141,131 @@ Bot.refundStarPayment(
 ---
 
 ### getBusinessAccountGifts
-Gets business account gifts.
+
+Returns the list of gifts that were received by a business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+| `offset` | Integer | No | Offset of the first entry to return. |
+| `limit` | Integer | No | Maximum number of gifts to be returned. |
+
+---
 
 ### getBusinessAccountStarBalance
-Gets business account star balance.
+
+Gets the Telegram Star balance of a connected business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+
+---
 
 ### getChatGifts
-Gets chat gifts.
+
+Returns the list of gifts that were received by a chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `offset` | Integer | No | Offset of the first entry to return. |
+| `limit` | Integer | No | Maximum number of gifts to be returned. |
+
+---
 
 ### getMyStarBalance
-Gets the bot's star balance.
+
+Gets the bot's own Telegram Star balance.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| *(none)* | — | — | No parameters required. |
+
+---
 
 ### editUserStarSubscription
-Edits a user's star subscription.
+
+Edits a user's star subscription (e.g. cancels it).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | User ID. |
+| `telegram_payment_charge_id` | String | Yes | Telegram payment identifier. |
+| `is_canceled` | Boolean | Yes | Pass `True` to cancel the subscription. |
+
+---
 
 ### removeBusinessAccountProfilePhoto
-Removes business account profile photo.
+
+Removes the profile photo of a connected business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+
+---
 
 ### setBusinessAccountGiftSettings
-Sets business account gift settings.
+
+Changes gift settings of a connected business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+| `is_enabled` | Boolean | No | True if the business allows receiving gifts. |
+
+---
 
 ### setBusinessAccountName
-Sets business account name.
+
+Changes the name of a connected business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+| `name` | String | Yes | New name of the business account. |
+
+---
 
 ### setBusinessAccountProfilePhoto
-Sets business account profile photo.
+
+Changes the profile photo of a connected business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+| `photo` | String | Yes | File ID of the new photo. |
+
+---
 
 ### setBusinessAccountUsername
-Sets business account username.
+
+Changes the username of a connected business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+| `username` | String | Yes | New username of the business account. |
+
+---
 
 ### transferBusinessAccountStars
-Transfers business account stars.
+
+Transfers Telegram Stars from a business account to the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+| `star_count` | Integer | Yes | Number of stars to transfer. |
+
+---
 
 ### transferGift
-Transfers a gift.
+
+Transfers a gift from the bot to another user.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Target user ID. |
+| `gift_id` | String | Yes | Identifier of the gift. |

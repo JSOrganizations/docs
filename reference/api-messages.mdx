@@ -474,11 +474,62 @@ Bot.editMessageText(chat_id=u, message_id=draft.message_id, text="Final AI Respo
 ```
 ---
 
-### sendChecklist
+## sendChecklist
+
 Sends a checklist message.
 
-### editMessageChecklist
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `options` | Array of String | Yes | Array of checklist options. |
+| `title` | String | No | Title of the checklist. |
+
+```python BLP Example
+Bot.sendChecklist(
+    chat_id=u,
+    title="Daily Tasks",
+    options=["Review code", "Write docs", "Push changes"]
+)
+```
+
+---
+
+## editMessageChecklist
+
 Edits a checklist message.
 
-### sendLivePhoto
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the checklist message to edit. |
+| `options` | Array of String | Yes | New array of checklist options. |
+| `title` | String | No | New title of the checklist. |
+
+```python BLP Example
+Bot.editMessageChecklist(
+    chat_id=u,
+    message_id=message.message_id,
+    title="Updated Daily Tasks",
+    options=["Review code", "Write docs", "Push changes", "Relax"]
+)
+```
+
+---
+
+## sendLivePhoto
+
 Sends a live photo.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `live_photo` | String | Yes | File ID or URL of the live photo. |
+| `caption` | String | No | Photo caption (0-1024 characters). |
+
+```python BLP Example
+Bot.sendLivePhoto(
+    chat_id=u,
+    live_photo="FILE_ID_HERE",
+    caption="Check out this live photo!"
+)
+```

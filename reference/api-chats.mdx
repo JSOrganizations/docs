@@ -919,4 +919,18 @@ Sets a custom title tag for a specific chat member.
 ---
 
 ### setUserEmojiStatus
-Changes the emoji status for a given user that previously allowed the bot to manage their emoji status via the Mini App method equestEmojiStatusAccess.
+
+Changes the emoji status for a given user that previously allowed the bot to manage their emoji status via the Mini App method `requestEmojiStatusAccess`.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Unique identifier of the target user. |
+| `emoji_status_custom_emoji_id` | String | No | Custom emoji identifier of the emoji status to set. Pass an empty string to remove the status. |
+| `emoji_status_expiration_date` | Integer | No | Expiration date of the emoji status, if any. |
+
+```python BLP Example
+Bot.setUserEmojiStatus(
+    user_id=u,
+    emoji_status_custom_emoji_id="CUSTOM_EMOJI_ID"
+)
+```
