@@ -7,7 +7,7 @@ description: 'Telegram API methods for sending photos, videos, and documents.'
 
 Use this method to send photos.
 
-```python TPY Example (URL)
+```python BLP Example (URL)
 Bot.sendPhoto(
     chat_id=u,
     photo="https://example.com/image.jpg",
@@ -15,7 +15,7 @@ Bot.sendPhoto(
 )
 ```
 
-```python TPY Example (File ID)
+```python BLP Example (File ID)
 Bot.sendPhoto(
     chat_id=u,
     photo="AgACAgIAAxkBAAMu...",
@@ -29,7 +29,7 @@ Bot.sendPhoto(
 
 Use this method to send video files, Telegram clients support mp4 videos.
 
-```python TPY Example
+```python BLP Example
 Bot.sendVideo(
     chat_id=u,
     video="https://example.com/video.mp4",
@@ -43,7 +43,7 @@ Bot.sendVideo(
 
 Use this method to send general files.
 
-```python TPY Example
+```python BLP Example
 Bot.sendDocument(
     chat_id=u,
     document="https://example.com/file.pdf",
@@ -79,7 +79,7 @@ Bot.sendVoice(
 
 Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type.
 
-```python TPY Example
+```python BLP Example
 media_array = [
     {"type": "photo", "media": "https://example.com/1.jpg"},
     {"type": "photo", "media": "https://example.com/2.jpg", "caption": "Group caption"}
@@ -96,7 +96,7 @@ Bot.sendMediaGroup(
 ## Location & Contacts
 
 ### sendLocation
-```python TPY Example
+```python BLP Example
 Bot.sendLocation(
     chat_id=u,
     latitude=40.7128,
@@ -105,7 +105,7 @@ Bot.sendLocation(
 ```
 
 ### sendVenue
-```python TPY Example
+```python BLP Example
 Bot.sendVenue(
     chat_id=u,
     latitude=40.7128,
@@ -116,7 +116,7 @@ Bot.sendVenue(
 ```
 
 ### sendContact
-```python TPY Example
+```python BLP Example
 Bot.sendContact(
     chat_id=u,
     phone_number="+1234567890",

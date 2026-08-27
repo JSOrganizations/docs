@@ -7,7 +7,7 @@ description: 'Telegram API methods for managing groups, channels, and members.'
 
 Use this method to ban a user in a group, a supergroup or a channel.
 
-```python TPY Example
+```python BLP Example
 Bot.banChatMember(
     chat_id=group_id,
     user_id=target_user_id
@@ -20,7 +20,7 @@ Bot.banChatMember(
 
 Use this method to unban a previously banned user in a supergroup or channel.
 
-```python TPY Example
+```python BLP Example
 Bot.unbanChatMember(
     chat_id=group_id,
     user_id=target_user_id,
@@ -34,7 +34,7 @@ Bot.unbanChatMember(
 
 Use this method to restrict a user in a supergroup.
 
-```python TPY Example
+```python BLP Example
 permissions = {
     "can_send_messages": False,
     "can_send_media_messages": False,
@@ -55,7 +55,7 @@ Bot.restrictChatMember(
 
 Use this method to promote or demote a user in a supergroup or a channel.
 
-```python TPY Example
+```python BLP Example
 Bot.promoteChatMember(
     chat_id=group_id,
     user_id=target_user_id,
@@ -74,7 +74,7 @@ Bot.promoteChatMember(
 
 Use these methods to change the title or description of a chat.
 
-```python TPY Example
+```python BLP Example
 Bot.setChatTitle(
     chat_id=group_id,
     title="New Awesome Group Name"
@@ -92,7 +92,7 @@ Bot.setChatDescription(
 
 Use this method to create an additional invite link for a chat.
 
-```python TPY Example
+```python BLP Example
 result = Bot.createChatInviteLink(
     chat_id=group_id,
     member_limit=10 # Link expires after 10 uses

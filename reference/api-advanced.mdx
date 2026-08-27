@@ -22,7 +22,7 @@ Simply take the exact method name from the official Telegram documentation and c
 ### Example 1: `setChatMenuButton`
 Suppose you want to change the menu button next to the chat input field, but it's not documented in our basic API list.
 
-```python TPY Example
+```python BLP Example
 # Looking at Telegram Docs:
 # setChatMenuButton takes chat_id and menu_button
 
@@ -42,7 +42,7 @@ Bot.setChatMenuButton(
 ### Example 2: `sendInvoice` (Payments / Telegram Stars)
 Sending an invoice for Telegram Stars is fully supported.
 
-```python TPY Example
+```python BLP Example
 prices = [
     {"label": "Premium Access", "amount": 500} # 500 Stars
 ]
@@ -60,7 +60,7 @@ Bot.sendInvoice(
 
 ### Example 3: `pinChatMessage`
 
-```python TPY Example
+```python BLP Example
 Bot.pinChatMessage(
     chat_id=u,
     message_id=message.message_id,

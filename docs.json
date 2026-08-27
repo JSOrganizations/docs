@@ -21,7 +21,7 @@
         "group": "Language Reference",
         "pages": [
           "reference/commands",
-          "reference/tpy-syntax"
+          "reference/blp-syntax"
         ]
       },
       {
