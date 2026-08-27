@@ -29,6 +29,7 @@
         "group": "Telegram API Methods",
         "pages": [
           "reference/api-messages",
+          "reference/api-rich-messages",
           "reference/api-media",
           "reference/api-chats",
           "reference/api-keyboards",
