@@ -63,6 +63,27 @@ Bot.copyMessage(
 
 ---
 
+## copyMessages
+
+Copies multiple messages.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID where the copies will be sent. |
+| `from_chat_id` | Integer or String | Yes | Source chat ID where the original messages are. |
+| `message_ids` | Array of Integer | Yes | Message IDs in the source chat. |
+| `remove_caption` | Boolean | No | If `True`, removes captions from media messages. |
+
+```python BLP Example
+Bot.copyMessages(
+    chat_id=u,
+    from_chat_id=u,
+    message_ids=[message.message_id, message.message_id - 1]
+)
+```
+
+---
+
 ## forwardMessage
 
 Forwards a message from one chat to another. Shows the original sender.
@@ -79,6 +100,26 @@ Bot.forwardMessage(
     chat_id=u,
     from_chat_id=u,
     message_id=message.message_id
+)
+```
+
+---
+
+## forwardMessages
+
+Forwards multiple messages from one chat to another.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `from_chat_id` | Integer or String | Yes | Source chat ID. |
+| `message_ids` | Array of Integer | Yes | Message IDs to forward. |
+
+```python BLP Example
+Bot.forwardMessages(
+    chat_id=u,
+    from_chat_id=u,
+    message_ids=[message.message_id, message.message_id - 1]
 )
 ```
 
@@ -244,6 +285,24 @@ Bot.sendPoll(
 
 ---
 
+## stopPoll
+
+Stops a poll which was sent by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | Message ID of the poll. |
+
+```python BLP Example
+Bot.stopPoll(
+    chat_id=u,
+    message_id=message.message_id
+)
+```
+
+---
+
 ## sendDice
 
 Sends an animated emoji that shows a random value.
@@ -311,6 +370,29 @@ Bot.editMessageText(
 
 ---
 
+## editMessageCaption
+
+Edits the caption of an existing media message sent by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Chat ID of the message to edit. |
+| `message_id` | Integer | Yes | ID of the message to edit. |
+| `caption` | String | Yes | New caption content. |
+| `parse_mode` | String | No | Formatting mode: `"HTML"`, `"Markdown"`, `"MarkdownV2"`. |
+| `reply_markup` | Object | No | New inline keyboard to attach. |
+
+```python BLP Example
+Bot.editMessageCaption(
+    chat_id=u,
+    message_id=message.message_id,
+    caption="<b>Updated caption!</b>",
+    parse_mode="HTML"
+)
+```
+
+---
+
 ## deleteMessage
 
 Deletes a message. Bots can only delete their own messages or messages in groups where they are admin.
@@ -325,4 +407,68 @@ Bot.deleteMessage(
     chat_id=u,
     message_id=message.message_id
 )
+```
+
+---
+
+## deleteMessages
+
+Deletes multiple messages simultaneously.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Chat ID. |
+| `message_ids` | Array of Integer | Yes | IDs of the messages to delete. |
+
+```python BLP Example
+Bot.deleteMessages(
+    chat_id=u,
+    message_ids=[message.message_id, message.message_id - 1]
+)
+```
+
+---
+
+## setMessageReaction
+
+Sets or removes a reaction (emoji or custom emoji) on a message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the message to react to. |
+| `reaction` | Array of Object | No | Array of `ReactionType` objects to set. Pass an empty array to remove all bot reactions. |
+| `is_big` | Boolean | No | Pass `True` to set the reaction with a big animation. |
+
+```python BLP Example
+# Set a thumbs up reaction
+Bot.setMessageReaction(
+    chat_id=u,
+    message_id=message.message_id,
+    reaction=[{"type": "emoji", "emoji": "👍"}]
+)
+
+# Remove reaction
+Bot.setMessageReaction(chat_id=u, message_id=message.message_id, reaction=[])
+```
+
+---
+
+## sendMessageDraft
+
+Streams a partial text message. Commonly used for streaming AI-generated text.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | No | The message ID to edit if updating a previously drafted message. If omitted, sends a new message. |
+| `text` | String | Yes | The text content to display. Can be empty. |
+| `can_stop` | Boolean | No | Pass `True` if the user can interrupt the generation. |
+| `keep_on_stop` | Boolean | No | Keep the drafted content if generation is stopped. |
+
+```python BLP Example
+draft = Bot.sendMessageDraft(chat_id=u, text="Thinking")
+Bot.sendMessageDraft(chat_id=u, message_id=draft.message_id, text="Thinking...")
+# Later, commit the final text using editMessageText
+Bot.editMessageText(chat_id=u, message_id=draft.message_id, text="Final AI Response")
 ```

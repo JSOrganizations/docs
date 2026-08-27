@@ -1,0 +1,137 @@
+---
+title: 'Stickers & Games'
+description: 'Manage custom sticker sets and HTML5 games.'
+---
+
+This section covers the management of Telegram Stickers, Custom Emojis, and HTML5 Games.
+
+---
+
+## Sticker Management
+
+### getStickerSet
+
+Gets a sticker set by its name.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Name of the sticker set. |
+
+```python BLP Example
+result = Bot.getStickerSet(name="Animals")
+```
+
+---
+
+### getCustomEmojiStickers
+
+Gets information about custom emoji stickers by their identifiers.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `custom_emoji_ids` | Array of String | Yes | A JSON-serialized list of custom emoji identifiers. At most 200 custom emoji identifiers can be specified. |
+
+---
+
+### createNewStickerSet
+
+Creates a new sticker set owned by a user. The bot will be able to edit the sticker set thus created.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | User identifier of created sticker set owner. |
+| `name` | String | Yes | Short name of sticker set, to be used in `t.me/addstickers/` URLs (e.g., `animals_by_bot`). |
+| `title` | String | Yes | Sticker set title, 1-64 characters. |
+| `stickers` | Array of Object | Yes | A JSON-serialized list of 1-50 initial stickers to be added to the sticker set. |
+| `sticker_type` | String | No | Type of stickers in the set, pass `"regular"`, `"mask"`, or `"custom_emoji"`. |
+
+---
+
+### addStickerToSet
+
+Adds a new sticker to a set created by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | User identifier of sticker set owner. |
+| `name` | String | Yes | Sticker set name. |
+| `sticker` | Object | Yes | A JSON-serialized object with information about the added sticker. |
+
+---
+
+### deleteStickerFromSet
+
+Deletes a sticker from a set created by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sticker` | String | Yes | File identifier of the sticker. |
+
+---
+
+### deleteStickerSet
+
+Deletes a sticker set that was created by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | String | Yes | Sticker set name. |
+
+---
+
+## Games
+
+Bots can offer users HTML5 games to play solo or compete against each other in groups and one-on-one chats.
+
+### sendGame
+
+Sends a game.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer | Yes | Unique identifier for the target chat. |
+| `game_short_name` | String | Yes | Short name of the game, serves as the unique identifier for the game. Set up your games via @BotFather. |
+
+```python BLP Example
+Bot.sendGame(
+    chat_id=u,
+    game_short_name="my_awesome_game"
+)
+```
+
+---
+
+### setGameScore
+
+Sets the score of the specified user in a game.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | User identifier. |
+| `score` | Integer | Yes | New score, must be non-negative. |
+| `force` | Boolean | No | Pass `True` if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters. |
+| `chat_id` | Integer | No | Required if `inline_message_id` is not specified. |
+| `message_id` | Integer | No | Required if `inline_message_id` is not specified. |
+| `inline_message_id` | String | No | Required if `chat_id` and `message_id` are not specified. |
+
+```python BLP Example
+Bot.setGameScore(
+    user_id=u,
+    score=1500,
+    chat_id=u,
+    message_id=message.message_id
+)
+```
+
+---
+
+### getGameHighScores
+
+Gets data for high score tables. Will return the score of the specified user and several of their neighbors in a game.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Target user id. |
+| `chat_id` | Integer | No | Required if `inline_message_id` is not specified. |
+| `message_id` | Integer | No | Required if `inline_message_id` is not specified. |
+| `inline_message_id` | String | No | Required if `chat_id` and `message_id` are not specified. |

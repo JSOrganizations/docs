@@ -312,6 +312,47 @@ Bot.revokeChatInviteLink(
 
 ---
 
+### createChatSubscriptionInviteLink
+
+Creates a subscription invite link for a channel. Users joining via this link will need to pay for the subscription.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `subscription_period` | Integer | Yes | The number of seconds the subscription will be active for before the next payment. |
+| `subscription_price` | Integer | Yes | The amount of Telegram Stars a user must pay initially and after each subsequent period. |
+| `name` | String | No | Link label. |
+
+```python BLP Example
+Bot.createChatSubscriptionInviteLink(
+    chat_id=message.chat.id,
+    subscription_period=2592000, # 30 days
+    subscription_price=100
+)
+```
+
+---
+
+### editChatSubscriptionInviteLink
+
+Edits a subscription invite link.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `invite_link` | String | Yes | The invite link to edit. |
+| `name` | String | No | New label. |
+
+```python BLP Example
+Bot.editChatSubscriptionInviteLink(
+    chat_id=message.chat.id,
+    invite_link="https://t.me/joinchat/XXXX",
+    name="Updated Subscription Name"
+)
+```
+
+---
+
 ### approveChatJoinRequest
 
 Approves a pending join request.
@@ -345,6 +386,16 @@ Bot.declineChatJoinRequest(
     user_id=message.from.id
 )
 ```
+
+---
+
+### answerChatJoinRequestQuery
+
+Use this method to respond to a join request query.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query_id` | String | Yes | Unique identifier for the query to be answered. |
 
 ---
 
@@ -563,3 +614,305 @@ Bot.sendMessage(
 if member.status in ["administrator", "creator"]:
     Bot.sendMessage(chat_id=u, text="You are an admin!")
 ```
+
+---
+
+## Forums and Topics
+
+### createForumTopic
+
+Creates a topic in a forum supergroup chat. The bot must be an administrator.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `name` | String | Yes | Topic name (1-128 characters). |
+| `icon_color` | Integer | No | Color of the topic icon in RGB format. |
+| `icon_custom_emoji_id` | String | No | Unique identifier of the custom emoji shown as the topic icon. |
+
+```python BLP Example
+Bot.createForumTopic(chat_id=message.chat.id, name="Announcements")
+```
+
+---
+
+### editForumTopic
+
+Edits name and icon of a topic in a forum supergroup chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_thread_id` | Integer | Yes | Unique identifier for the target message thread of the forum topic. |
+| `name` | String | No | New topic name. |
+| `icon_custom_emoji_id` | String | No | New unique identifier of the custom emoji shown as the topic icon. |
+
+---
+
+### closeForumTopic
+
+Closes an open topic in a forum supergroup chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_thread_id` | Integer | Yes | Unique identifier for the target message thread. |
+
+---
+
+### reopenForumTopic
+
+Reopens a closed topic in a forum supergroup chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_thread_id` | Integer | Yes | Unique identifier for the target message thread. |
+
+---
+
+### deleteForumTopic
+
+Deletes a forum topic along with all its messages.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_thread_id` | Integer | Yes | Unique identifier for the target message thread. |
+
+---
+
+### unpinAllForumTopicMessages
+
+Clears the list of pinned messages in a forum topic.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_thread_id` | Integer | Yes | Unique identifier for the target message thread. |
+
+---
+
+### editGeneralForumTopic
+
+Edits the name of the 'General' topic in a forum supergroup chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `name` | String | Yes | New topic name (1-128 characters). |
+
+---
+
+### closeGeneralForumTopic
+
+Closes the 'General' topic in a forum supergroup chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+
+---
+
+### reopenGeneralForumTopic
+
+Reopens a closed 'General' topic in a forum supergroup chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+
+---
+
+### hideGeneralForumTopic
+
+Hides the 'General' topic in a forum supergroup chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+
+---
+
+### unhideGeneralForumTopic
+
+Unhides the 'General' topic in a forum supergroup chat.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+
+---
+
+### unpinAllGeneralForumTopicMessages
+
+Clears the list of pinned messages in the 'General' topic.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+
+---
+
+## User Metadata
+
+### getUserProfilePhotos
+
+Gets a list of profile pictures for a user.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Telegram user ID. |
+| `offset` | Integer | No | Sequential number of the first photo to be returned. |
+| `limit` | Integer | No | Limits the number of photos to be retrieved (1-100). Defaults to 100. |
+
+```python BLP Example
+photos = Bot.getUserProfilePhotos(user_id=u)
+Bot.sendMessage(chat_id=u, text=f"You have {photos.result.total_count} profile photos.")
+```
+
+---
+
+### getUserProfileAudios
+
+Gets the user's audio profile info (if available via API limitations).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Telegram user ID. |
+
+---
+
+### getUserPersonalChatMessages
+
+Used to access personal chat messages based on specific Telegram client settings. 
+
+---
+
+### getUserChatBoosts
+
+Gets the list of boosts added to a chat by a user.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `user_id` | Integer | Yes | Telegram user ID. |
+
+---
+
+## Verification & Chat Properties
+
+### verifyChat
+
+Verifies a chat on behalf of the organization which is represented by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `custom_description` | String | No | Custom description for the verification (0-70 characters). |
+
+---
+
+### verifyUser
+
+Verifies a user on behalf of the organization which is represented by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Target user ID. |
+| `custom_description` | String | No | Custom description for the verification (0-70 characters). |
+
+---
+
+### removeChatVerification
+
+Removes verification from a chat that was verified by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+
+---
+
+### removeUserVerification
+
+Removes verification from a user that was verified by the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Target user ID. |
+
+---
+
+### setChatStickerSet
+
+Sets a new group sticker set for a supergroup.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `sticker_set_name` | String | Yes | Name of the sticker set to be set as the group sticker set. |
+
+---
+
+### deleteChatStickerSet
+
+Deletes the group sticker set from a supergroup.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+
+---
+
+### getChatMenuButton
+
+Gets the current value of the bot's menu button in a private chat, or the default menu button.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer | No | Target private chat ID. |
+
+---
+
+### setChatMenuButton
+
+Changes the bot's menu button in a private chat, or the default menu button.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer | No | Target private chat ID. |
+| `menu_button` | Object | No | A JSON-serialized object for the bot's new menu button. |
+
+---
+
+### setMyDefaultAdministratorRights
+
+Changes the default administrator rights requested by the bot when it's added as an administrator to groups or channels.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `rights` | Object | No | A JSON-serialized object describing new default administrator rights. |
+| `for_channels` | Boolean | No | Pass `True` to change the default administrator rights in channels. |
+
+---
+
+### getMyDefaultAdministratorRights
+
+Gets the current default administrator rights of the bot.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `for_channels` | Boolean | No | Pass `True` to get default administrator rights of the bot in channels. |
+
+---
+
+### setChatMemberTag
+
+Sets a custom title tag for a specific chat member.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `user_id` | Integer | Yes | User ID. |
+| `tag` | String | Yes | The tag to apply. |

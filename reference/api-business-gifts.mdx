@@ -1,0 +1,140 @@
+---
+title: 'Business & Gifts'
+description: 'Manage Telegram Business accounts, Gifts, and Stars (Paid Media).'
+---
+
+This section covers features introduced in recent Bot API updates tailored for **Telegram Business**, **Gifts**, and monetization via **Telegram Stars**.
+
+---
+
+## Telegram Business
+
+Bots can be connected to Telegram Business accounts to reply on behalf of users.
+
+### getBusinessConnection
+
+Gets information about the connection of the bot with a business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+
+---
+
+### setBusinessAccountBio
+
+Changes the bio of a connected business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+| `bio` | String | Yes | New bio of the business account, 0-70 characters. |
+
+*(Similar methods exist for `setBusinessAccountName`, `setBusinessAccountUsername`, `setBusinessAccountProfilePhoto`, `removeBusinessAccountProfilePhoto`, etc.)*
+
+---
+
+### deleteBusinessMessages
+
+Deletes messages in a connected business account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `business_connection_id` | String | Yes | Unique identifier of the business connection. |
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_ids` | Array of Integer | Yes | A JSON-serialized list of 1-100 message identifiers to delete. |
+
+---
+
+## Gifts
+
+Bots can interact with Telegram Gifts, querying available gifts and sending them to users.
+
+### getAvailableGifts
+
+Returns the list of gifts that can be sent by the bot to users.
+
+---
+
+### getUserGifts
+
+Returns the list of gifts that were received by a specific user.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Telegram user ID. |
+| `offset` | Integer | No | Offset of the first entry to return. |
+| `limit` | Integer | No | Maximum number of gifts to be returned (1-100). |
+
+---
+
+### sendGift
+
+Sends a gift to the given user. The bot must have enough Telegram Stars to send the gift.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Target Telegram user ID. |
+| `gift_id` | String | Yes | Identifier of the gift. |
+| `pay_for_upgrade` | Boolean | No | Pass `True` to pay for the gift upgrade from the bot's balance. |
+| `text` | String | No | Text shown along with the gift (0-255 characters). |
+
+```python BLP Example
+Bot.sendGift(
+    user_id=u,
+    gift_id="GIFT_ID_HERE",
+    text="Thanks for being a loyal user!"
+)
+```
+
+---
+
+## Stars and Payments
+
+### sendPaidMedia
+
+Sends paid media to a chat. Users must pay the specified amount of Telegram Stars to view it.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `star_count` | Integer | Yes | The number of Telegram Stars that must be paid to buy access to the media (1-2500). |
+| `media` | Array of Object | Yes | A JSON-serialized array describing the media to be sent (up to 10 items). |
+
+```python BLP Example
+media = [{"type": "photo", "media": "AgACAgIAAxkBAAMrZN..."}]
+Bot.sendPaidMedia(
+    chat_id=u,
+    star_count=50,
+    media=jsondumps(media)
+)
+```
+
+---
+
+### getStarTransactions
+
+Returns the bot's Telegram Star transactions.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `offset` | Integer | No | Number of transactions to skip. |
+| `limit` | Integer | No | Maximum number of transactions to be returned (1-100). |
+
+---
+
+### refundStarPayment
+
+Refunds a successful payment in Telegram Stars.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | Integer | Yes | Identifier of the user whose payment will be refunded. |
+| `telegram_payment_charge_id` | String | Yes | Telegram payment identifier. |
+
+```python BLP Example
+Bot.refundStarPayment(
+    user_id=u,
+    telegram_payment_charge_id="CHARGE_ID_HERE"
+)
+```

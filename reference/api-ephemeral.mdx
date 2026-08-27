@@ -1,0 +1,92 @@
+---
+title: 'Ephemeral Messages'
+description: 'Send and manage self-destructing and private messages visible only to a specific user.'
+---
+
+Ephemeral Messages (introduced in Telegram Bot API 10.2) allow bots to send messages in groups that are visible **only to a specific user and the bot itself**. These messages automatically disappear and do not clutter the chat history.
+
+---
+
+## Sending Ephemeral Messages
+
+Most message-sending methods (`sendMessage`, `sendPhoto`, `sendRichMessage`, etc.) support the `ephemeral_message_parameters` parameter. However, bots typically use this feature in response to specific triggers or inline button clicks.
+
+*(See `sendMessage` in the **Messages & Content** section for full details).*
+
+---
+
+## deleteEphemeralMessage
+
+Deletes an ephemeral message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | Unique identifier of the ephemeral message. |
+
+```python BLP Example
+Bot.deleteEphemeralMessage(
+    chat_id=message.chat.id,
+    message_id=message.ephemeral_message_id
+)
+```
+
+---
+
+## editEphemeralMessageText
+
+Edits the text of an ephemeral message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the ephemeral message. |
+| `text` | String | Yes | New text of the message. |
+| `parse_mode` | String | No | Formatting mode (`"HTML"`, `"Markdown"`). |
+| `reply_markup` | Object | No | A JSON-serialized inline keyboard. |
+
+```python BLP Example
+Bot.editEphemeralMessageText(
+    chat_id=u,
+    message_id=call.message.ephemeral_message_id,
+    text="Your private status has been updated!"
+)
+```
+
+---
+
+## editEphemeralMessageCaption
+
+Edits the caption of an ephemeral media message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the ephemeral message. |
+| `caption` | String | Yes | New caption of the message. |
+| `parse_mode` | String | No | Formatting mode. |
+| `show_caption_above_media` | Boolean | No | Pass `True` if the caption must be shown above the media. |
+
+---
+
+## editEphemeralMessageMedia
+
+Edits animation, audio, document, photo, or video ephemeral messages.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the ephemeral message. |
+| `media` | Object | Yes | A JSON-serialized object for a new media content. |
+
+---
+
+## editEphemeralMessageReplyMarkup
+
+Edits only the reply markup of an ephemeral message.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chat_id` | Integer or String | Yes | Target chat ID. |
+| `message_id` | Integer | Yes | ID of the ephemeral message. |
+| `reply_markup` | Object | Yes | A JSON-serialized inline keyboard. |
