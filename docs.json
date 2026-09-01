@@ -2,6 +2,16 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Bots Limited",
+  "metadata": {
+    "og:title": "Bots Limited — Build Telegram Bots Without a Server",
+    "og:description": "Bots Limited is a cloud platform that lets you build, host, and scale Telegram bots instantly using BLP Language (Python). No server setup, no webhooks, no hassle.",
+    "og:site_name": "Bots Limited Documentation",
+    "og:image": "/logo/banner.png",
+    "twitter:card": "summary_large_image",
+    "twitter:title": "Bots Limited — Build Telegram Bots Without a Server",
+    "twitter:description": "Write Python-based BLP code and deploy Telegram bots instantly. Auto-scaling, built-in storage, zero setup required.",
+    "twitter:image": "/logo/banner.png"
+  },
   "colors": {
     "primary": "#F97316",
     "light": "#FB923C",
