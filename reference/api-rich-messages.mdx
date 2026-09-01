@@ -1,71 +1,73 @@
 ---
 title: 'Rich Messages'
-description: 'Send advanced structured messages with HTML/Markdown formatting, slideshows, tables, buttons, and streaming drafts.'
+description: 'Send advanced structured messages with HTML/Markdown formatting, slideshows, tables, buttons, media, and streaming drafts.'
 ---
 
 Rich messages support advanced structured formatting like headings, lists, tables, media collages, block quotations, collapsible blocks, footnotes, and LaTeX formulas.
 
 > **Limits:**
 > - Up to **32,768 UTF-8 characters** in the message text
-> - Up to **500 blocks** (including nested blocks)
+> - Up to **500 blocks** (including nested blocks, list items, table rows, etc.)
 > - Up to **16 levels** of nesting
-> - Up to **50 media attachments**
+> - Up to **50 media attachments** in total
 > - Up to **20 columns** in a table
 
 ---
 
 ## sendRichMessage
 
-Sends a rich formatted message. Use either `html`, `markdown`, or `blocks` in the `rich_message` object — not multiple.
+Sends a rich formatted message. Use exactly one of `html`, `markdown`, or `blocks` in the `rich_message` object.
+
+> If the message contains a media block, the bot must have the right to send that media type to the chat.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `chat_id` | Integer or String | Yes | Target chat ID or `@username`. |
+| `business_connection_id` | String | No | Business connection on behalf of which the message is sent. |
+| `chat_id` | Integer or String | Yes | Target chat ID or @username. |
+| `message_thread_id` | Integer | No | Unique identifier for the target message thread (topic). |
+| `direct_messages_topic_id` | Integer | No | Topic ID for direct messages chats. |
+| `ephemeral_message_parameters` | Object | No | Parameters of the ephemeral message to send. |
 | `rich_message` | Object | Yes | An `InputRichMessage` object (see below). |
 | `disable_notification` | Boolean | No | Sends silently. |
 | `protect_content` | Boolean | No | Prevents forwarding/saving. |
+| `allow_paid_broadcast` | Boolean | No | Allows up to 1000 msgs/sec ignoring limits for 0.1 Stars per message. |
+| `message_effect_id` | String | No | Unique identifier of the message effect (private chats only). |
+| `suggested_post_parameters` | Object | No | Parameters of the suggested post to send. |
 | `reply_parameters` | Object | No | Message to reply to. |
 | `reply_markup` | Object | No | Inline keyboard to attach. |
 
 ### InputRichMessage Fields
+
+Exactly one of `html`, `markdown`, or `blocks` must be provided.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `html` | String | No* | Message content using HTML formatting. |
 | `markdown` | String | No* | Message content using Markdown formatting. |
 | `blocks` | Array | No* | Message content as an array of `InputRichBlock` objects. |
-| `is_rtl` | Boolean | No | If `True`, message is displayed right-to-left. |
-| `skip_entity_detection` | Boolean | No | If `True`, disables auto-detection of URLs, emails, hashtags, etc. |
+| `media` | Array | No | List of `InputRichMessageMedia` objects for referencing pre-uploaded media via `tg://photo?id=`, `tg://video?id=`, `tg://document?id=`, or `tg://audio?id=` links. |
+| `is_rtl` | Boolean | No | If True, message is displayed right-to-left. |
+| `skip_entity_detection` | Boolean | No | If True, disables auto-detection of URLs, emails, hashtags, bot commands, phone numbers, etc. |
 
-> **\*** Exactly one of `html`, `markdown`, or `blocks` must be provided.
+### InputRichMessageMedia Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | String | Unique identifier (1-64 chars, only A-Z, a-z, 0-9, _ and - allowed). |
+| `media` | InputMedia... | The media to send: InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, or InputMediaVoiceNote. |
 
 ```python BLP Example (HTML Table)
-rich_html_content = """<table bordered>
-  <caption>Student Information List</caption>
-  <tr>
-    <th>Roll</th>
-    <th>Name</th>
-    <th>Class</th>
-    <th>Status</th>
-  </tr>
-  <tr>
-    <td><b>01</b></td>
-    <td>Mobassher Ahmed</td>
-    <td>Class 10</td>
-    <td>Passed</td>
-  </tr>
-  <tr>
-    <td><b>02</b></td>
-    <td>Humayun Kabir</td>
-    <td>Class 10</td>
-    <td>Passed</td>
-  </tr>
+html_table = """<table bordered striped>
+  <caption>Student Information</caption>
+  <tr><th>Roll</th><th>Name</th><th>Class</th><th>Status</th></tr>
+  <tr><td><b>01</b></td><td>Mobassher Ahmed</td><td>Class 10</td><td>Passed</td></tr>
+  <tr><td><b>02</b></td><td>Humayun Kabir</td><td>Class 10</td><td>Failed</td></tr>
 </table>"""
 
 Bot.sendRichMessage(
     chat_id=u,
     rich_message={
-        "html": rich_html_content,
+        "html": html_table,
         "is_rtl": False,
         "skip_entity_detection": False
     }
@@ -74,33 +76,30 @@ Bot.sendRichMessage(
 
 ```python BLP Example (HTML Slideshow + Details + Buttons)
 rich_html = """
-<h1><tg-emoji emoji-id="6163613480936021313">🔒</tg-emoji> Hidely - Hide Photos</h1>
-
+<h1>Hidely - Hide Photos</h1>
 <tg-slideshow>
   <img src="https://example.com/screen1.jpg"/>
   <img src="https://example.com/screen2.jpg"/>
   <figcaption>App Screenshots<cite>Version 2.0</cite></figcaption>
 </tg-slideshow>
-
 <aside><b>Your ultimate privacy companion.</b></aside>
-
 <hr/>
-
 <h3>Core Features</h3>
 <ul>
   <li><input type="checkbox" checked> <b>Private Vault</b></li>
   <li><input type="checkbox" checked> <b>App Disguise</b></li>
-  <li><input type="checkbox" checked> <b>Intruder Selfie</b></li>
+  <li><input type="checkbox"> <b>Cloud Backup</b> (coming soon)</li>
 </ul>
-
 <details open>
   <summary><b>How it works</b></summary>
   <p>Your files are stored <b>locally</b> with zero cloud exposure.</p>
   <blockquote>We never see your data.<cite>Privacy Promise</cite></blockquote>
 </details>
-
 <hr/>
-
+<p>Get it now:
+  <tg-button type="url" style="success" url="https://bots.lt">Download</tg-button>
+  <tg-button type="callback_data" style="link" data="more_info">More Info</tg-button>
+</p>
 <footer>Your privacy is our architecture.</footer>
 """
 
@@ -110,54 +109,65 @@ Bot.sendRichMessage(
 )
 ```
 
-```python BLP Example (Markdown)
-md_content = """
-# Welcome to Rich Messages
-**Bold**, *italic*, ~~strikethrough~~, `code`, ==highlighted==, ||spoiler||
-
-| Feature | Supported |
-|:--------|:---------:|
-| Tables  | ✅ |
-| LaTeX   | ✅ |
-| Media   | ✅ |
-
-$$E = mc^2$$
-
-> This is a block quotation
+```python BLP Example (All elements combined)
+html = """
+<h1>Dashboard Summary</h1>
+<p>Welcome <a href="tg://user?id=123456789">User</a>! Daily report below.</p>
+<blockquote>Today was a productive day.<cite>System</cite></blockquote>
+<blockquote expandable>Long details hidden by default.<cite>Analytics</cite></blockquote>
+<h2>Statistics</h2>
+<table bordered striped compact>
+  <caption>Today Metrics</caption>
+  <tr><th>Metric</th><th>Value</th><th>Change</th></tr>
+  <tr><td>Users</td><td><b>1,234</b></td><td><mark>+12%</mark></td></tr>
+  <tr><td>Revenue</td><td><b>$5,678</b></td><td><s>-3%</s></td></tr>
+</table>
+<h2>Formula</h2>
+<tg-math-block>E = mc^2</tg-math-block>
+<h2>Collage</h2>
+<tg-collage>
+  <img src="https://example.com/chart1.png"/>
+  <img src="https://example.com/chart2.png"/>
+  <figcaption>Performance Charts<cite>Q3 2026</cite></figcaption>
+</tg-collage>
+<details>
+  <summary>Raw Logs</summary>
+  <pre><code class="language-python">print("Server started OK")</code></pre>
+</details>
+<tg-button-row align="center">
+  <tg-button type="url" style="success" url="https://bots.lt">Open Dashboard</tg-button>
+  <tg-button type="callback_data" style="primary" data="refresh">Refresh</tg-button>
+  <tg-button type="callback_data" style="danger" data="stop">Stop</tg-button>
+</tg-button-row>
+<footer>Generated by BotsLT Analytics</footer>
 """
 
-Bot.sendRichMessage(
-    chat_id=u,
-    rich_message={"markdown": md_content}
-)
+Bot.sendRichMessage(chat_id=u, rich_message={"html": html})
 ```
 
 ---
 
 ## sendRichMessageDraft
 
-Streams a **partial/in-progress** rich message to the user — useful for AI responses that appear progressively. The draft is ephemeral (disappears after ~30 seconds). After generation is complete, call `sendRichMessage` to persist the final message.
+Streams a **partial/in-progress** rich message to the user. Ideal for AI responses that appear progressively. Draft disappears after ~30 seconds. Call `sendRichMessage` to persist.
+
+> **Note:** Direct upload of new files is not supported in drafts. Use only already-uploaded file IDs.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `chat_id` | Integer | Yes | Target private chat ID. |
-| `draft_id` | Integer | Yes | Non-zero integer identifying the draft. Changes with the same `draft_id` are animated. Different `draft_id` replaces without animation. |
+| `message_thread_id` | Integer | No | Unique identifier for the target message thread. |
+| `draft_id` | Integer | Yes | Non-zero integer identifying the draft. Same `draft_id` = animated update. Different = replaced without animation. |
 | `rich_message` | Object | Yes | The partial message as an `InputRichMessage` object. |
-| `can_stop` | Boolean | No | If `True`, shows the user a "Stop" button. |
-| `keep_on_stop` | Boolean | No | If `True`, keeps the draft visible when user presses Stop. |
+| `can_stop` | Boolean | No | If True, shows a Stop button. Bot receives `stopped_message_generation` if pressed. |
+| `keep_on_stop` | Boolean | No | If True, keeps the draft visible when Stop is pressed. |
 
-> **Note:** Direct file uploads are not supported in drafts. Use already-uploaded file IDs only.
-
-```python BLP Example (Streaming AI Response)
-import time
-
-# Step 1: Show thinking animation
+```python BLP Example (AI Streaming Response)
+# Step 1: Show Thinking animation
 Bot.sendRichMessageDraft(
     chat_id=u,
     draft_id=1001,
-    rich_message={
-        "html": "<tg-thinking>Thinking...</tg-thinking>"
-    },
+    rich_message={"html": "<tg-thinking>Thinking...</tg-thinking>"},
     can_stop=True
 )
 
@@ -165,9 +175,7 @@ Bot.sendRichMessageDraft(
 Bot.sendRichMessageDraft(
     chat_id=u,
     draft_id=1001,
-    rich_message={
-        "html": "<h2>Analysis</h2><p>Processing your request...</p>"
-    },
+    rich_message={"html": "<h2>Analysis</h2><p>Processing your request...</p>"},
     can_stop=True
 )
 
@@ -175,7 +183,7 @@ Bot.sendRichMessageDraft(
 Bot.sendRichMessage(
     chat_id=u,
     rich_message={
-        "html": "<h2>Analysis Complete</h2><p>Here are your results: <b>All checks passed!</b></p>"
+        "html": "<h2>Analysis Complete</h2><p>All checks passed!</p>"
     }
 )
 ```
@@ -188,12 +196,12 @@ Bot.sendRichMessage(
 
 | Tag | Effect |
 |-----|--------|
-| `<b>`, `<strong>` | **Bold** |
-| `<i>`, `<em>` | *Italic* |
+| `<b>`, `<strong>` | Bold |
+| `<i>`, `<em>` | Italic |
 | `<u>`, `<ins>` | Underline |
-| `<s>`, `<del>`, `<strike>` | ~~Strikethrough~~ |
-| `<code>` | `Inline code` |
-| `<mark>` | ==Highlighted== |
+| `<s>`, `<del>`, `<strike>` | Strikethrough |
+| `<code>` | Inline code |
+| `<mark>` | Highlighted |
 | `<sub>` | Subscript |
 | `<sup>` | Superscript |
 | `<tg-spoiler>` | Spoiler (tap to reveal) |
@@ -201,24 +209,24 @@ Bot.sendRichMessage(
 | `<tg-time unix="..." format="wDT">` | Formatted date/time |
 | `<tg-math>` | Inline LaTeX math |
 
-### Links & Anchors
+### Links and Anchors
 
 ```html
 <a href="https://t.me/">Regular URL</a>
 <a href="mailto:user@example.com">Email</a>
 <a href="tel:+123456789">Phone</a>
 <a href="tg://user?id=123456789">User mention</a>
-<a name="chapter-1"></a>           <!-- Create anchor -->
-<a href="#chapter-1">Jump to chapter 1</a>   <!-- Link to anchor -->
+<a name="chapter-1"></a>                     <!-- Create named anchor -->
+<a href="#chapter-1">Go to Chapter 1</a>    <!-- Link to anchor -->
 <tg-reference name="note-1">Footnote text</tg-reference>
-<a href="#note-1">[1]</a>          <!-- Link to reference -->
+<a href="#note-1">[1]</a>                    <!-- Link to reference -->
 ```
 
-### Structure
+### Structure and Layout
 
 ```html
 <h1>Heading 1</h1> ... <h6>Heading 6</h6>
-<p>Paragraph</p>
+<p>Paragraph text</p>
 <pre>Preformatted block</pre>
 <pre><code class="language-python">print("Hello")</code></pre>
 <footer>Footer text</footer>
@@ -235,11 +243,14 @@ Bot.sendRichMessage(
   <li>Item two</li>
 </ul>
 
-<!-- Ordered -->
-<ol start="1" type="1">
-  <li>First</li>
-  <li>Second</li>
+<!-- Ordered with start, type, reversed -->
+<ol start="3" type="a" reversed>
+  <li>Third (c)</li>
+  <li>Second (b)</li>
 </ol>
+
+<!-- With explicit item number -->
+<ol><li value="7" type="i">Item seven (vii)</li></ol>
 
 <!-- Checkboxes -->
 <ul>
@@ -248,49 +259,55 @@ Bot.sendRichMessage(
 </ul>
 ```
 
+**Ordered list `type` values:** `1` (decimal), `a` (lowercase letters), `A` (uppercase letters), `i` (lowercase Roman), `I` (uppercase Roman).
+
 ### Block Quotations
 
 ```html
-<!-- Standard -->
 <blockquote>Quote text<cite>The Author</cite></blockquote>
-
-<!-- Expandable (collapsed by default) -->
-<blockquote expandable>Long quote...<cite>Source</cite></blockquote>
-
-<!-- Pull quote (centered) -->
+<blockquote expandable>Very long text...<cite>Source</cite></blockquote>
 <aside>Pull quote text<cite>Author</cite></aside>
 ```
 
-### Media
+### Media Blocks
+
+> Media can only be specified as a separate block (not inline). Only HTTP/HTTPS URLs are supported.
 
 ```html
-<!-- Standalone media -->
 <img src="https://example.com/photo.jpg"/>
 <video src="https://example.com/video.mp4"></video>
 <audio src="https://example.com/audio.mp3"></audio>
-<tg-document src="https://example.com/file.pdf"></tg-document>
+<audio src="https://example.com/voice.ogg"></audio>
+<video src="https://example.com/anim.gif"></video>
+<tg-document src="https://example.com/file.zip"></tg-document>
 
 <!-- With caption and spoiler -->
 <figure>
   <img src="https://example.com/photo.jpg" tg-spoiler/>
-  <figcaption>Caption<cite>Credit</cite></figcaption>
+  <figcaption>Photo caption<cite>Credit</cite></figcaption>
+</figure>
+<figure>
+  <video src="https://example.com/video.mp4" tg-spoiler></video>
+  <figcaption>Video caption</figcaption>
 </figure>
 
 <!-- Map -->
 <tg-map lat="41.9" long="12.5" zoom="14"/>
+<figure>
+  <tg-map lat="41.9" long="12.5" zoom="14"/>
+  <figcaption>Map caption</figcaption>
+</figure>
 ```
 
-### Collage & Slideshow
+### Collage and Slideshow
 
 ```html
-<!-- Collage (grid layout) -->
 <tg-collage>
   <img src="https://example.com/1.jpg"/>
   <img src="https://example.com/2.jpg"/>
-  <figcaption>Caption</figcaption>
+  <figcaption>Caption<cite>Credit</cite></figcaption>
 </tg-collage>
 
-<!-- Slideshow (swipeable) -->
 <tg-slideshow>
   <img src="https://example.com/1.jpg"/>
   <video src="https://example.com/video.mp4"/>
@@ -307,61 +324,73 @@ Bot.sendRichMessage(
   <tr><td>Alice</td><td>95</td></tr>
 </table>
 
-<!-- Styled table (bordered + striped + compact) -->
+<!-- Styled with merging and alignment -->
 <table bordered striped compact>
   <caption>Table Title</caption>
   <tr>
-    <td colspan="2" align="left">Merged Cell</td>
+    <td colspan="2" rowspan="2" align="left">Merged Cell</td>
+    <td align="center">Center</td>
     <td align="right" valign="top">Right Top</td>
   </tr>
 </table>
 ```
 
+| Attribute | Description |
+|-----------|-------------|
+| `bordered` | Adds visible borders |
+| `striped` | Alternates row background colors |
+| `compact` | Reduces cell padding |
+| `colspan="N"` | Cell spans N columns |
+| `rowspan="N"` | Cell spans N rows |
+| `align="left/center/right"` | Horizontal alignment |
+| `valign="top/middle/bottom"` | Vertical alignment |
+
 ### Collapsible Details Block
 
 ```html
-<!-- Collapsed by default -->
 <details>
   <summary>Click to expand</summary>
   <p>Hidden content here.</p>
 </details>
 
-<!-- Expanded by default -->
 <details open>
-  <summary><b>Always visible summary</b></summary>
-  <ul>
-    <li>Item 1</li>
-    <li>Item 2</li>
-  </ul>
+  <summary><b>Expanded by default</b></summary>
+  <pre><code class="language-python">print("hello")</code></pre>
 </details>
 ```
 
 ### Interactive Buttons
 
-Buttons can appear **inline** inside text or in **row blocks**.
-
 ```html
-<!-- Inline buttons inside paragraph -->
-<p>Choose an action:
-  <tg-button type="url" style="success" url="https://bots.lt">Visit Site</tg-button>
-  <tg-button type="callback_data" style="link" data="btn_info">More Info</tg-button>
-  <tg-button type="web_app" style="danger" url="https://bots.lt">Open App</tg-button>
-  <tg-button type="copy_text" text="copied!">Copy Code</tg-button>
-  <tg-button type="disabled">Unavailable</tg-button>
+<!-- Inline inside paragraph -->
+<p>Actions:
+  <tg-button type="url" style="success" url="https://bots.lt">Visit</tg-button>
+  <tg-button type="callback_data" style="link" data="info">Info</tg-button>
+  <tg-button type="web_app" style="danger" url="https://bots.lt">App</tg-button>
+  <tg-button type="copy_text" text="text_to_copy">Copy</tg-button>
+  <tg-button type="disabled">Disabled</tg-button>
 </p>
 
-<!-- Button rows with alignment -->
+<!-- Button rows -->
 <tg-button-row align="left">
   <tg-button type="url" url="https://t.me">Telegram</tg-button>
-  <tg-button type="callback_data" data="info">Info</tg-button>
+  <tg-button type="callback_data" style="primary" data="ok">OK</tg-button>
 </tg-button-row>
 
 <tg-button-row align="center">
-  <tg-button type="switch_inline_query" query="search">Search Inline</tg-button>
+  <tg-button type="switch_inline_query" style="primary" query="search">Search</tg-button>
+  <tg-button type="switch_inline_query_current_chat" query="find">Find Here</tg-button>
 </tg-button-row>
 
 <tg-button-row align="right">
   <tg-button type="login_url" url="https://t.me" forward-text="Login" request-write-access>Login</tg-button>
+</tg-button-row>
+
+<tg-button-row>
+  <tg-button type="switch_inline_query_chosen_chat" query="q"
+    allow-user-chats allow-bot-chats allow-group-chats allow-channel-chats>
+    All Chats
+  </tg-button>
 </tg-button-row>
 ```
 
@@ -370,16 +399,16 @@ Buttons can appear **inline** inside text or in **row blocks**.
 | `type` | Description |
 |--------|-------------|
 | `url` | Opens a URL |
-| `callback_data` | Sends callback to bot |
-| `web_app` | Opens a Mini App |
-| `login_url` | Telegram Login Widget |
-| `switch_inline_query` | Opens inline mode in another chat |
+| `callback_data` | Sends a callback query (1-64 bytes) |
+| `web_app` | Opens a Mini App (private chats only) |
+| `login_url` | Telegram Login Widget (requires domain via @BotFather) |
+| `switch_inline_query` | Opens inline mode in a chosen chat |
 | `switch_inline_query_current_chat` | Opens inline mode in current chat |
-| `switch_inline_query_chosen_chat` | Opens inline mode with chat filter |
+| `switch_inline_query_chosen_chat` | Opens inline mode with chat type filter |
 | `copy_text` | Copies specified text to clipboard |
-| `disabled` | Shows a non-interactive button |
+| `disabled` | Non-interactive disabled button |
 
-**Button styles:** `success` (green), `danger` (red), `primary` (blue), `link` (borderless link).
+**Button styles:** `success` (green), `danger` (red), `primary` (blue), `link` (borderless; only for `callback_data`).
 
 ---
 
@@ -392,18 +421,169 @@ Buttons can appear **inline** inside text or in **row blocks**.
 | `~~strikethrough~~` | Strikethrough |
 | `` `code` `` | Inline code |
 | `==marked==` | Highlighted |
-| `\|\|spoiler\|\|` | Spoiler |
+| `||spoiler||` | Spoiler |
 | `[text](URL)` | Link |
-| `[user](tg://user?id=...)` | User mention |
-| `![👍](tg://emoji?id=...)` | Custom emoji |
-| `$x^2$` or `$$E=mc^2$$` | Inline/block math |
-| ` ```python ``` ` | Code block |
-| `# H1` to `###### H6` | Headings |
-| `---` | Divider |
+| `[email](mailto:user@example.com)` | Email link |
+| `[phone](tel:+123456789)` | Phone link |
+| `[user](tg://user?id=123456789)` | User mention |
+| `![emoji](tg://emoji?id=...)` | Custom emoji |
+| `![time](tg://time?unix=...&format=wDT)` | Date/time entity |
+| `$x^2$` | Inline LaTeX math |
+| `$$E=mc^2$$` | Block LaTeX math |
+| ` ```python ``` ` | Code block with syntax highlighting |
+| `---` | Horizontal divider |
+| `# H1` to `###### H6` | Headings 1-6 |
 | `- item`, `* item`, `+ item` | Unordered list |
 | `1. item` | Ordered list |
-| `- [ ] task`, `- [x] done` | Task list |
+| `- [ ] task`, `- [x] done` | Task/checkbox list |
 | `> quote` | Block quotation |
-| `![](URL "Caption")` | Media with caption |
-| `\| col \| col \|` | Table |
-| `[^id]: text` | Footnote |
+| `![](URL "Caption")` | Media block with caption |
+| `| col | col |` | Table |
+| `[^id]: text` | Footnote definition |
+| `text[^id]` | Footnote reference |
+
+---
+
+## Block Reference (InputRichBlock Types)
+
+When using the `blocks` array, each block is a JSON object with a `type` field. All 24 supported block types:
+
+| Block Type | HTML Equivalent | Key Fields |
+|------------|-----------------|------------|
+| `paragraph` | `<p>` | `text` |
+| `heading` | `<h1>`-`<h6>` | `text`, `size` (1-6, 1 is largest) |
+| `pre` | `<pre><code>` | `text`, `language` (optional) |
+| `footer` | `<footer>` | `text` |
+| `divider` | `<hr/>` | none |
+| `mathematical_expression` | `<tg-math-block>` | `expression` (LaTeX string) |
+| `anchor` | `<a name="...">` | `name` |
+| `list` | `<ul>` / `<ol>` | `items` (array of InputRichBlockListItem) |
+| `blockquote` | `<blockquote>` | `blocks`, `credit` (optional) |
+| `expandable_blockquote` | `<blockquote expandable>` | `text`, `credit` (optional) |
+| `pullquote` | `<aside>` | `text`, `credit` (optional) |
+| `collage` | `<tg-collage>` | `blocks`, `caption` (optional) |
+| `slideshow` | `<tg-slideshow>` | `blocks`, `caption` (optional) |
+| `table` | `<table>` | `cells` (2D array), `is_bordered`, `is_striped`, `is_compact`, `caption` |
+| `details` | `<details>` | `summary`, `blocks`, `is_open` (optional) |
+| `map` | `<tg-map>` | `location`, `zoom` (0-24), `width`, `height` (each 0-10000), `caption` |
+| `buttons` | `<tg-button-row>` | `buttons` (1-8), `align` (left/center/right) |
+| `animation` | `<video>` (gif) | `animation` (InputMediaAnimation), `caption` |
+| `audio` | `<audio>` | `audio` (InputMediaAudio), `caption` |
+| `document` | `<tg-document>` | `document` (InputMediaDocument), `caption` |
+| `photo` | `<img>` | `photo` (InputMediaPhoto), `has_spoiler`, `caption` |
+| `video` | `<video>` | `video` (InputMediaVideo), `has_spoiler`, `caption` |
+| `voice_note` | `<audio>` (ogg) | `voice_note` (InputMediaVoiceNote), `caption` |
+| `thinking` | `<tg-thinking>` | `text` — **draft only**, cannot appear in final messages |
+
+**InputRichBlockListItem fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `blocks` | Array | Content of the list item |
+| `has_checkbox` | Boolean | Optional. Add a checkbox |
+| `is_checked` | Boolean | Optional. Mark checkbox as checked |
+| `value` | Integer | Optional. For ordered lists, explicit label number |
+| `type` | String | Optional. For ordered lists: `1`, `a`, `A`, `i`, `I` |
+
+```python BLP Example (Using blocks array directly)
+Bot.sendRichMessage(
+    chat_id=u,
+    rich_message={
+        "blocks": [
+            {"type": "heading", "text": "Sales Report", "size": 1},
+            {"type": "paragraph", "text": "Here is the summary for today."},
+            {
+                "type": "table",
+                "is_bordered": True,
+                "is_striped": True,
+                "caption": "Today Numbers",
+                "cells": [
+                    [
+                        {"text": "Product", "is_header": True, "align": "left"},
+                        {"text": "Sales", "is_header": True, "align": "right"}
+                    ],
+                    [
+                        {"text": "Widget A", "align": "left"},
+                        {"text": "1,200", "align": "right"}
+                    ]
+                ]
+            },
+            {"type": "divider"},
+            {
+                "type": "buttons",
+                "align": "center",
+                "buttons": [
+                    {"text": "View Report", "url": "https://bots.lt", "style": "success"},
+                    {"text": "Refresh", "callback_data": "refresh", "style": "primary"}
+                ]
+            }
+        ]
+    }
+)
+```
+
+---
+
+## RichMessageButton Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `text` | RichText | Button label. May contain plain text, custom emoji, and date/time entities. |
+| `style` | String | Optional. One of `danger`, `success`, `primary`, or `link`. The `link` style is only for `callback_data` buttons. |
+| `url` | String | HTTP or tg:// URL opened on press. |
+| `callback_data` | String | Data sent in a callback query (1-64 bytes). |
+| `web_app` | WebAppInfo | Mini App to launch (private chats only). |
+| `login_url` | LoginUrl | HTTPS URL for Telegram Login Widget. |
+| `switch_inline_query` | String | Prompts user to pick a chat and inserts inline query. |
+| `switch_inline_query_current_chat` | String | Inserts inline query in the current chat. |
+| `switch_inline_query_chosen_chat` | SwitchInlineQueryChosenChat | Inline query with chat type filter. |
+| `copy_text` | CopyTextButton | Copies text to clipboard. |
+| `disabled` | DisabledButton | Non-interactive disabled button. |
+
+---
+
+## Special Tags
+
+### Thinking Block (Draft Only)
+
+Only valid inside `sendRichMessageDraft`. Cannot appear in `sendRichMessage`.
+
+```html
+<tg-thinking>Thinking...</tg-thinking>
+```
+
+> See [AIActions emoji pack](https://t.me/addemoji/AIActions) for recommended custom emoji for thinking blocks.
+
+### Date/Time Entities
+
+```html
+<!-- HTML -->
+<tg-time unix="1647531900" format="wDT">22:45 tomorrow</tg-time>
+
+<!-- Markdown -->
+![22:45 tomorrow](tg://time?unix=1647531900&format=wDT)
+```
+
+### Custom Emoji
+
+```html
+<!-- HTML -->
+<tg-emoji emoji-id="5368324170671202286">emoji</tg-emoji>
+
+<!-- Markdown -->
+![emoji](tg://emoji?id=5368324170671202286)
+```
+
+---
+
+## Important Notes
+
+- **Entity auto-detection:** URLs, emails, usernames, hashtags, cashtags, bot commands, phone numbers, and bank card numbers are detected automatically. Pass `skip_entity_detection: True` to disable.
+- **Telegram link alert:** Users see an alert before opening inline links.
+- **Media URL reuse:** Use `tg://photo?id=...`, `tg://video?id=...`, `tg://document?id=...`, or `tg://audio?id=...` links together with the `media` field to embed pre-uploaded files.
+- **Markdown inside HTML:** Markdown is **not** parsed inside block HTML tags except inside `<details>`, `<tg-collage>`, and `<tg-slideshow>`.
+- **Table cells:** Support only **inline** formatting (no nested block elements).
+- **Formula source:** Treated as raw LaTeX.
+- **Map constraints:** Width x height must not exceed 10,000. Width-to-height ratio must be at most 20. Zoom: 0-24.
+- **Button rows:** Each `<tg-button-row>` / `buttons` block supports 1-8 buttons.
+- **Draft-only blocks:** `thinking` blocks can only be used in `sendRichMessageDraft`, not `sendRichMessage`.
