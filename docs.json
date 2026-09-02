@@ -99,7 +99,8 @@
   "footer": {
     "socials": {
       "telegram": "https://t.me/JSOrganization",
-      "github": "https://github.com/JSOrganizations"
+      "github": "https://github.com/JSOrganizations",
+      "website": "https://bots.lt"
     }
   }
 }
