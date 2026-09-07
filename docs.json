@@ -24,8 +24,7 @@
         "group": "Getting Started",
         "pages": [
           "index",
-          "getting-started/quickstart",
-          "getting-started/cli"
+          "getting-started/quickstart"
         ]
       },
       {
@@ -55,6 +54,12 @@
         "pages": [
           "reference/api-libraries",
           "libraries/bot-wrapper"
+        ]
+      },
+      {
+        "group": "Advanced & Tools",
+        "pages": [
+          "getting-started/cli"
         ]
       }
     ],
