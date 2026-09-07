@@ -1,55 +1,42 @@
-# Mintlify Starter Kit
+# Bots Limited (Bots.LT) Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+This repository contains the official documentation for **Bots Limited** ([Bots.LT](https://bots.lt)), the cloud platform that lets you build, host, and scale Telegram bots instantly using BLP Language (Bots Limited Python).
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Overview
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+Bots.LT provides a completely serverless environment to write Telegram bots. No webhooks, no servers, no hassle. The documentation here covers:
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+- **Getting Started:** Quickstart guides and local CLI usage (`botslt`).
+- **BLP Language:** Syntax, variables, and security constraints.
+- **Data Storage:** Built-in blazing fast key-value states (`User`, `Bot`, `Api`).
+- **Telegram API:** Full wrappers around the Telegram Bot API.
 
-## AI-assisted writing
+## Running Locally
 
-Set up your AI coding tool to work with Mintlify:
+This documentation is built using [Mintlify](https://mintlify.com/).
+
+To preview the documentation locally, install the Mintlify CLI:
 
 ```bash
-npx skills add https://mintlify.com/docs
+npm i -g mintlify
 ```
 
-This command installs Mintlify's documentation skill for your configured AI tools like Claude Code, Cursor, Windsurf, and others. The skill includes component reference, writing standards, and workflow guidance.
+Run the development server from this repository root:
 
-See the [AI tools guides](/ai-tools) for tool-specific setup.
-
-## Development
-
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
-
-```
-npm i -g mint
+```bash
+mintlify dev
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+Visit `http://localhost:3000` to view the live preview.
 
-```
-mint dev
-```
+## Deployment & Updates
 
-View your local preview at `http://localhost:3000`.
+All pages are written in Markdown (`.mdx`). The main navigation configuration is located in `docs.json`.
+When pushing changes to the `main` branch, the Mintlify app will automatically deploy the updates to the official documentation site.
 
-## Publishing changes
+## Community & Support
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
-
-## Need help?
-
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+- **Main Platform**: [bots.lt](https://bots.lt)
+- **Official Docs Site**: [help.bots.lt](https://help.bots.lt)
+- **Telegram Community**: [@bots_lt](https://t.me/bots_lt)
+- **Organization**: [JSOrganizations](https://github.com/JSOrganizations)
