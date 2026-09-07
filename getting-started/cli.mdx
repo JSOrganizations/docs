@@ -1,0 +1,103 @@
+---
+title: 'Bots.LT CLI (blp)'
+description: 'Develop locally and sync your bot commands with Git-like workflow'
+---
+
+The **Bots.LT CLI** (`botslt`) is a powerful command-line tool designed to help developers write and manage bot commands locally using their favorite IDE (like VS Code, PyCharm). 
+
+Instead of writing code in the web editor, you can write Python files locally and push them to your bot instantly.
+
+## Installation
+
+You need Python 3.8+ installed on your computer. Install the CLI using pip:
+
+```bash
+pip install botslt
+```
+
+## Quick Start Guide
+
+### 1. Login
+
+First, you need to authenticate your CLI with your Bots.LT account using your API key. You can get your API Key from **Dashboard → Settings → Security**.
+
+```bash
+blp login
+```
+*Your credentials will be securely stored in `~/.botslt/credentials.json`.*
+
+### 2. Initialize a Project
+
+Create a folder for your bot and run `blp init` inside it.
+
+```bash
+mkdir my-awesome-bot
+cd my-awesome-bot
+blp init
+```
+This command will ask for your **Bot ID** (e.g., `42294666`) and generate a `blp.json` configuration file and a sample `start.py` file.
+
+### 3. Add Commands
+
+To map a Telegram command to a local Python file, use the `add` command:
+
+```bash
+blp add /help help.py
+blp add @ at_handler.py
+```
+This updates your `blp.json` file. You can also edit `blp.json` manually to configure aliases.
+
+### 4. Push Code to Server
+
+Whenever you finish writing code in your Python files, sync them to the server:
+
+```bash
+blp push
+```
+*The CLI uses a `botslt.lock` file to only push files that have actually changed since your last push!*
+
+## blp.json Configuration
+
+The `blp.json` file acts as the registry for your bot's commands. It links the command triggers to your local `.py` files.
+
+### Basic Structure with Aliases
+You can define aliases for your commands by using the dictionary structure:
+
+```json
+{
+    "bot_id": "12345678",
+    "commands": {
+        "/start": {
+            "file": "start.py",
+            "aliases": ["/menu", "Start Bot"]
+        },
+        "/help": "help.py",
+        "@": "at_handler.py"
+    }
+}
+```
+If you push this configuration, the `/start` command will be automatically triggered even if the user types `/menu` or `Start Bot`.
+
+## All Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `blp login` | Save your API key |
+| `blp logout` | Remove saved credentials |
+| `blp init` | Create `blp.json` in current folder |
+| `blp add <cmd> <file.py>` | Map a command to a local file |
+| `blp push` | Push only changed commands to the server |
+| `blp push <file.py>` | Push a specific file |
+| `blp push --all` | Push all commands, ignoring the cache lock |
+| `blp pull` | Download all commands from the server to your local PC |
+| `blp status` | See which files are modified locally |
+| `blp logs` | Show the most recent error logs for your bot |
+| `blp bots` | List all bots in your account |
+
+## Git Integration
+
+Bots.LT CLI is designed to play nicely with Git. 
+
+- Commit `blp.json` and your `.py` files to your Git repository.
+- **Never commit `botslt.lock`** (it is automatically ignored via `.gitignore`).
+- If you use version control, you and your team can collaborate locally and `blp push` to deploy!
