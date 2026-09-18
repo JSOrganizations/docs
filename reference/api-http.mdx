@@ -1,0 +1,210 @@
+---
+title: 'HTTP Client'
+description: 'Make external HTTP requests from your bot code using the built-in HTTP object. Supports GET, POST, PUT, PATCH, and DELETE.'
+---
+
+The `HTTP` object is a globally available HTTP client injected into every BLP command. It allows your bot to communicate with **any external REST API** — no imports, no setup required.
+
+> **Tip:** The `HTTP` object wraps Python's `requests` library under the hood, so response objects behave similarly (`.json()`, `.text`, `.status_code`, etc.).
+
+---
+
+## HTTP.get
+
+Sends an HTTP **GET** request to the specified URL. Commonly used for fetching data from REST APIs.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | String | Yes | The target URL. |
+| `headers` | Dict | No | Optional HTTP headers (e.g. Authorization). |
+
+**Returns:** A `requests.Response` object. Use `.json()` to parse JSON, `.text` for raw text, `.status_code` for the HTTP status.
+
+```python BLP Example
+# Fetch a joke from a public API
+res = HTTP.get("https://official-joke-api.appspot.com/jokes/random")
+joke = res.json()
+Bot.sendMessage(
+    chat_id=u,
+    text=f"😂 {joke['setup']}\n\n👉 {joke['punchline']}"
+)
+```
+
+```python BLP Example (With Headers)
+api_key = Bot.getData("weather_api_key")
+city = message.text or "Dhaka"
+
+res = HTTP.get(
+    f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+)
+if res.status_code == 200:
+    data = res.json()
+    temp = data["main"]["temp"]
+    desc = data["weather"][0]["description"]
+    Bot.sendMessage(chat_id=u, text=f"🌤️ {city}: {temp}°C, {desc}")
+else:
+    Bot.sendMessage(chat_id=u, text="❌ Could not fetch weather data.")
+```
+
+---
+
+## HTTP.post
+
+Sends an HTTP **POST** request. Used for submitting data or triggering actions on external services.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | String | Yes | The target URL. |
+| `data` | String or Dict | No | Form data payload. If a string, it is UTF-8 encoded automatically. |
+| `json` | Dict | No | JSON payload. Sets `Content-Type: application/json` automatically. |
+| `headers` | Dict | No | Optional HTTP headers. |
+
+> **Note:** Pass either `data` or `json`, not both at the same time.
+
+```python BLP Example (JSON body)
+res = HTTP.post(
+    "https://api.example.com/users",
+    json={"name": "Alice", "email": "alice@example.com"},
+    headers={"Authorization": "Bearer my_token"}
+)
+if res.status_code == 201:
+    Bot.sendMessage(chat_id=u, text="✅ User created!")
+else:
+    Bot.sendMessage(chat_id=u, text=f"❌ Error: {res.text}")
+```
+
+```python BLP Example (Form data)
+res = HTTP.post(
+    "https://api.example.com/submit",
+    data={"field1": "value1", "field2": "value2"}
+)
+Bot.sendMessage(chat_id=u, text=f"Response: {res.text}")
+```
+
+---
+
+## HTTP.put
+
+Sends an HTTP **PUT** request. Used to **replace or fully update** an existing resource.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | String | Yes | The target URL. |
+| `data` | String or Dict | No | Form data payload. |
+| `json` | Dict | No | JSON payload. |
+| `headers` | Dict | No | Optional HTTP headers. |
+
+```python BLP Example
+order_id = User.getData("order_id")
+res = HTTP.put(
+    f"https://api.example.com/orders/{order_id}",
+    json={"status": "confirmed", "note": "Approved by user"},
+    headers={"Authorization": "Bearer my_token"}
+)
+if res.ok:
+    Bot.sendMessage(chat_id=u, text="✅ Order updated successfully!")
+else:
+    Bot.sendMessage(chat_id=u, text="❌ Failed to update order.")
+```
+
+---
+
+## HTTP.patch
+
+Sends an HTTP **PATCH** request. Used to **partially update** a resource — only the fields you provide will be changed.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | String | Yes | The target URL. |
+| `data` | String or Dict | No | Form data payload. |
+| `json` | Dict | No | JSON payload. |
+| `headers` | Dict | No | Optional HTTP headers. |
+
+```python BLP Example
+# Only update the user's subscription status, not other fields
+user_id = User.getData("external_id")
+res = HTTP.patch(
+    f"https://api.example.com/users/{user_id}",
+    json={"subscription": "premium"},
+    headers={"Authorization": "Bearer my_token"}
+)
+if res.status_code == 200:
+    Bot.sendMessage(chat_id=u, text="⭐ Subscription activated!")
+else:
+    Bot.sendMessage(chat_id=u, text="❌ Update failed.")
+```
+
+---
+
+## HTTP.delete
+
+Sends an HTTP **DELETE** request. Used to remove a resource from an external service.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | String | Yes | The target URL. |
+| `headers` | Dict | No | Optional HTTP headers. |
+
+```python BLP Example
+record_id = User.getData("record_id")
+res = HTTP.delete(
+    f"https://api.example.com/records/{record_id}",
+    headers={"Authorization": "Bearer my_token"}
+)
+if res.status_code == 204:
+    User.deleteData("record_id")
+    Bot.sendMessage(chat_id=u, text="🗑️ Record deleted.")
+else:
+    Bot.sendMessage(chat_id=u, text="❌ Could not delete record.")
+```
+
+---
+
+## Working with Responses
+
+All `HTTP` methods return a standard response object with the following useful attributes:
+
+| Attribute / Method | Description |
+|--------------------|-------------|
+| `.status_code` | HTTP status code (e.g. `200`, `404`, `500`) |
+| `.ok` | `True` if status code is less than 400 |
+| `.text` | Raw response body as a string |
+| `.json()` | Parses response body as JSON and returns a dict/list |
+| `.headers` | Response headers dict |
+
+```python BLP Example
+res = HTTP.get("https://httpbin.org/get")
+
+Bot.sendMessage(
+    chat_id=u,
+    text=f"Status: {res.status_code}\nOK: {res.ok}\nBody preview: {res.text[:100]}"
+)
+```
+
+---
+
+## Full Example — Sending a Notification to an External API
+
+```python BLP Example
+# Notify your own backend when a user completes an action in the bot
+user_id = u
+username = message.chat.get("username", "unknown")
+
+res = HTTP.post(
+    "https://my-backend.example.com/api/bot-event",
+    json={
+        "event": "task_completed",
+        "telegram_id": user_id,
+        "username": username
+    },
+    headers={
+        "Authorization": "Bearer " + Bot.getData("backend_secret"),
+        "Content-Type": "application/json"
+    }
+)
+
+if res.ok:
+    Bot.sendMessage(chat_id=u, text="✅ Your progress has been recorded!")
+else:
+    Bot.sendMessage(chat_id=u, text="⚠️ Could not sync your data right now.")
+```

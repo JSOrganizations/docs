@@ -53,6 +53,7 @@
         "group": "Core Libraries (Libs)",
         "pages": [
           "reference/api-libraries",
+          "reference/api-http",
           "libraries/bot-wrapper"
         ]
       },
