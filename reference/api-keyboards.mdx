@@ -23,6 +23,8 @@ Represents a single button inside an inline keyboard.
 | `web_app` | String | No | URL of a Telegram Web App to launch. |
 | `switch_inline_query` | String | No | Opens inline query prompt in a chosen chat. |
 | `switch_inline_query_current_chat` | String | No | Inserts inline query in the current chat. |
+| `style` | String | No | Button color style (`primary`, `success`, `danger`, or `link`). |
+| `icon_custom_emoji_id` | String | No | Premium custom emoji ID to display inside the button. |
 
 ### InlineKeyboardMarkup
 
@@ -51,6 +53,31 @@ Bot.sendMessage(
     chat_id=u,
     text="Choose an option:",
     reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
+)
+```
+
+```python BLP Example (Styled Inline Keyboard)
+# Note: Bot Owner must have Telegram Premium to use Premium Custom Emojis.
+# Button colors (styles) are available for all users.
+EMOJI_ID = "5474667187258006816"
+styled_keyboard = [
+    [
+        InlineKeyboardButton(text="Primary", callback_data="primary_btn", style="primary"),
+        InlineKeyboardButton(text="Success", callback_data="success_btn", style="success")
+    ],
+    [
+        InlineKeyboardButton(text="Danger", callback_data="danger_btn", style="danger")
+    ],
+    [
+        InlineKeyboardButton(text="Emoji Button", callback_data="emoji_btn", icon_custom_emoji_id=EMOJI_ID)
+    ]
+]
+
+Bot.sendMessage(
+    chat_id=u,
+    text="<b>🔥 New Button UI Preview</b>\n\nColored buttons + premium emoji icons",
+    parse_mode="HTML",
+    reply_markup=InlineKeyboardMarkup(inline_keyboard=styled_keyboard)
 )
 ```
 
@@ -104,6 +131,8 @@ Represents a single button in a reply keyboard.
 | `request_contact` | Boolean | No | If `True`, sends the user's phone number. |
 | `request_location` | Boolean | No | If `True`, sends the user's current location. |
 | `web_app` | String | No | URL of a Web App to launch. |
+| `style` | String | No | Button color style (`primary`, `success`, `danger`). |
+| `icon_custom_emoji_id` | String | No | Premium custom emoji ID to display inside the button. |
 
 ### ReplyKeyboardMarkup
 
@@ -132,6 +161,33 @@ Bot.sendMessage(
         resize_keyboard=True,
         one_time_keyboard=False,
         input_field_placeholder="Type or tap a button..."
+    )
+)
+```
+
+```python BLP Example (Styled Reply Keyboard)
+# Note: Bot Owner must have Telegram Premium to use Premium Custom Emojis.
+# Button colors (styles) are free for all users.
+styled_reply_keyboard = [
+    [
+        KeyboardButton(text="Primary Button", style="primary"),
+        KeyboardButton(text="Success Button", style="success")
+    ],
+    [
+        KeyboardButton(text="Danger Button", style="danger")
+    ],
+    [
+        KeyboardButton(text="Emoji Button", icon_custom_emoji_id="6080004495046089734")
+    ]
+]
+
+Bot.sendMessage(
+    chat_id=u,
+    text="<b>🔥 New Button UI Preview</b>\n\nColored buttons + premium emoji icons",
+    parse_mode="HTML",
+    reply_markup=ReplyKeyboardMarkup(
+        keyboard=styled_reply_keyboard,
+        resize_keyboard=True
     )
 )
 ```
