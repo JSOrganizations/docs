@@ -3,7 +3,9 @@ title: 'Bots.LT CLI (blp)'
 description: 'Develop locally and sync your bot commands with Git-like workflow'
 ---
 
-The **Bots.LT CLI** (`botslt`) is a powerful command-line tool designed to help developers write and manage bot commands locally using their favorite IDE (like VS Code, PyCharm). 
+The **Bots.LT CLI** (`botslt`) is a powerful command-line tool designed to help developers write and manage bot commands locally using their favorite IDE (like VS Code, PyCharm).
+
+> **Latest version: `v1.1.12`**
 
 Instead of writing code in the web editor, you can write Python files locally and push them to your bot instantly.
 
@@ -86,14 +88,41 @@ If you push this configuration, the `/start` command will be automatically trigg
 | `blp logout` | Remove saved credentials |
 | `blp init` | Create `blp.json` in current folder |
 | `blp add <cmd> <file.py>` | Map a command to a local file |
-| `blp push` | Push only changed commands to the server |
+| `blp push` | Push changed commands to server |
 | `blp push <file.py>` | Push a specific file |
-| `blp push --all` | Push all commands, ignoring the cache lock |
-| `blp pull` | Download all commands from the server to your local PC |
-| `blp status` | See which files are modified locally |
-| `blp logs` | Show the most recent error logs for your bot |
-| `blp bots` | List all bots in your account |
-| `blp docs` | Download and update the local AI Context (`AGENTS.md`) |
+| `blp push --all` | Push all commands (ignore change detection) |
+| `blp pull` | Pull all server commands to local files |
+| `blp status` | Show which files have changed |
+| `blp logs` | Show recent bot error logs |
+| `blp bots` | List all your bots |
+| `blp commands [bot_id]` | List all commands for a bot |
+| `blp view <cmd> [bot_id]` | View the code of a specific command |
+| `blp delete <cmd> [bot_id]` | Delete a command from the server |
+| `blp start [bot_id]` | Start a bot (ID is optional if in project) |
+| `blp stop [bot_id]` | Stop a bot (ID is optional if in project) |
+| `blp docs` | Update AI context (`AGENTS.md`) locally |
+
+## Starting and Stopping Bots
+
+You can start and stop your bots directly from the CLI. The command is smart enough to know which bot to target based on your context:
+
+```bash
+# 1. If you are inside a project folder, it automatically uses the bot_id from blp.json
+blp start
+
+# 2. If you are NOT in a project folder, it will prompt you for the Bot ID:
+# Bot ID to start: 43812369
+
+# 3. You can also pass the Bot ID directly to override blp.json
+blp start 43812369
+```
+
+The exact same rules apply for stopping a bot:
+
+```bash
+blp stop
+blp stop 43812369
+```
 
 ## Git Integration
 
