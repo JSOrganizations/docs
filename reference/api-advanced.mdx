@@ -493,23 +493,9 @@ These are **Bots.LT-specific** methods, not part of the standard Telegram API.
 
 Returns detailed information about the current bot from the Bots.LT platform.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `bot_id` | String | No | Bot ID to query. Defaults to current bot. |
-
-**Returns** a `DotDict` with fields: `token`, `bot_id`, `owner_email`, `status`, `username`, `first_name`, `userstat` (total users).
-
-```python BLP Example
-info = Bot.info()
-Bot.sendMessage(
-    chat_id=u,
-    text=f"Bot: {info.first_name}\nStatus: {info.status}\nTotal users: {info.userstat}"
-)
-
-# Or access via dynamic properties
-Bot.sendMessage(chat_id=u, text=f"My username: @{Bot.username}")
-Bot.sendMessage(chat_id=u, text=f"Owner: {Bot.owner_email}")
-```
+<Note>
+  The full documentation for bot variables and `Bot.info()` is covered together in [BLP Syntax & Variables → Bot Details](/reference/blp-syntax#bot-details).
+</Note>
 
 ---
 

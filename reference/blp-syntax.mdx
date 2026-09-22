@@ -35,6 +35,8 @@ Whenever a command runs, the following variables are automatically available in 
 
 ### Bot Details
 
+The following variables give you instant access to the current bot's basic information. They are injected automatically — no function call needed.
+
 | Variable | Type | Description |
 |----------|------|-------------|
 | `bot_id` | String | The unique identifier of your bot on the Bots.LT platform. |
@@ -42,9 +44,26 @@ Whenever a command runs, the following variables are automatically available in 
 | `bot_username` | String | The Telegram username of your bot (without the `@`). |
 | `bot_name` | String | The display name of your bot. |
 
+For **advanced platform data**, you can also call `Bot.info()` directly. This returns a `DotDict` with additional fields: `owner_email`, `status`, and `userstat` (total users). It also supports querying other bots you own.
+
+| Method | Returns | Extra Fields |
+|--------|---------|-------------|
+| `Bot.info()` | `DotDict` | `token`, `bot_id`, `owner_email`, `status`, `username`, `first_name`, `userstat` |
+| `Bot.info(bot_id="...")` | `DotDict` | Same fields, but for a different bot you own. |
+
 ```python BLP Example
-# Using injected variables
-Bot.sendMessage(chat_id=u, text=f"Hello, {user.first_name}! You sent {command} with params {params}.")
+# Using injected variables (fast, no function call)
+Bot.sendMessage(chat_id=u, text=f"My bot's name is {bot_name} and ID is {bot_id}")
+
+# Using Bot.info() for advanced data
+info = Bot.info()
+Bot.sendMessage(
+    chat_id=u,
+    text=f"Bot: {info.first_name}\nStatus: {info.status}\nTotal users: {info.userstat}"
+)
+
+# Dynamic property access (shorthand for Bot.info())
+Bot.sendMessage(chat_id=u, text=f"Owner: {Bot.owner_email}")
 
 # Handling callbacks
 if call:
