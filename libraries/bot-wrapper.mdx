@@ -83,7 +83,7 @@ Copies a message of any kind without the "Forwarded from" tag.
 ### `Bot.answerCallbackQuery(callback_query_id, text="", show_alert=False)`
 Answers a callback query (when a user clicks an Inline Keyboard Button). Stops the loading spinner on the button.
 ```python
-Bot.answerCallbackQuery(call.id, text="Button clicked!", show_alert=True)
+Bot.answerCallbackQuery(callback_query_id=call.id, text="Button clicked!", show_alert=True)
 ```
 
 ---
